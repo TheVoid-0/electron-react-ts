@@ -1,0 +1,47 @@
+{
+  "compileOnSave": false,
+  "buildOnSave": false,
+  "compilerOptions": {
+    "paths": {
+      "~@common/*": [
+        "../@common/*"
+      ]
+    },
+    "rootDirs": [
+      "../@common",
+      "./"
+    ],
+    //   "baseUrl": "desktop-app/electron/",
+    "outDir": "../build/electron",
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "sourceMap": true,
+    "declaration": false,
+    "downlevelIteration": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "moduleResolution": "node",
+    "importHelpers": true,
+    "target": "es2017",
+    "module": "commonJs", // was es2020 but for electron to work commonJs is needed
+    "isolatedModules": true,
+    "noEmit": false,
+    "allowSyntheticDefaultImports": true,
+    "typeRoots": [
+      "../node_modules/@types"
+    ],
+    "lib": [
+      "es2018",
+      "dom"
+    ],
+  },
+  "include": [
+    "./"
+  ],
+  "exclude": [
+    "../node_modules",
+    "../src" // <- necessário para não recompilar o react
+  ],
+}
