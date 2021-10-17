@@ -18,21 +18,42 @@ function App() {
 
   testeIpc();
 
+  let qtdeDetectada = 5;
+  let statusSistema = 'desligado';
+  let statusDeteccao = 'off';
+
   return (
     <div className="App">
-      <header className="App-header">
-        <p>1q1
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div className="card">
+        <h3>DETECTOR DE PRESENÇA</h3>
+        <hr></hr>
+
+        <div>
+          <strong>Status: <span className={statusSistema}>{statusSistema}</span></strong>
+          <hr></hr>
+        </div>
+
+        <div className="deteccao-section">
+          <strong>Detecção:</strong>
+          <div className={statusDeteccao + ' led'}></div>
+        </div>
+
+        <div className="qtde-section">
+          <label><span className="qtde">{ qtdeDetectada }</span> presenças detectadas</label>
+        </div>
+
+        <div className="exportar-section">
+          <button className="exportar">
+            Exportar arquivo
+          </button>
+        </div>
+
+        <hr></hr>
+        <div className="card-footer">
+          <small>Desenvolvido por: Diovanna, Felipe P. e Marco</small>
+          <small>Disciplina: Integração e Software-Hardware</small>
+        </div>
+      </div>
     </div>
   );
 }
