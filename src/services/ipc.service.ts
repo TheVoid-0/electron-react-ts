@@ -1,20 +1,30 @@
-import { IpcRenderer, IpcRendererEvent } from 'electron';
+import { IpcRendererEvent } from 'electron';
 import { Observable, Subscriber } from 'rxjs';
 
 type IpcResponse = {
     event: IpcRendererEvent,
     body: any
 }
+
+type Unsubscribe = () => void;
+type Listener = (...args: any[]) => void;
+
+interface ipcRenderer {
+    send: (channel: string, ...data: any[]) => void
+    on: (channel: string, listener: Listener) => Unsubscribe
+}
+
 class IpcService {
 
-    private _ipc: IpcRenderer | undefined = void 0;
+    private _ipc: ipcRenderer | undefined;
     private listeners: { [key: string]: string[] } = {};
 
     constructor() {
         console.log('service constructor code')
-        if (window.require) {
+        if ((window as any).ipc) {
             try {
-                this._ipc = window.require('electron').ipcRenderer;
+                this._ipc = (window as any).ipc as ipcRenderer;
+                console.log(this._ipc)
             } catch (e) {
                 console.warn('Electron\'s IPC was not loaded');
                 throw e;
@@ -50,7 +60,6 @@ class IpcService {
             this.createResponseListener(subscriber, channel);
             this._ipc.send(channel, ...args);
         });
-
     }
 
     private createResponseListener(subscriber: Subscriber<IpcResponse>, channel: string) {
@@ -68,22 +77,22 @@ class IpcService {
             } else {
                 subscriber.next({ event, body: { ...args } });
             }
-            this._ipc?.removeAllListeners(`${channel}-ready`);
+
             subscriber.complete();
         });
     }
 
-    public removeFromChannel(channel: string): void {
-        this._ipc?.removeAllListeners(channel);
-    }
+    // public removeFromChannel(channel: string): void {
+    //     this._ipc?.removeAllListeners(channel);
+    // }
 
-    public removeAllFromPage(page: string): void {
-        for (const channel of this.listeners[page]) {
-            this._ipc?.removeAllListeners(channel);
-        }
-        delete this.listeners[page];
-        this._ipc?.send(`${page}-closed`);
-    }
+    // public removeAllFromPage(page: string): void {
+    //     for (const channel of this.listeners[page]) {
+    //         this._ipc?.removeAllListeners(channel);
+    //     }
+    //     delete this.listeners[page];
+    //     this._ipc?.send(`${page}-closed`);
+    // }
 
     /**
      * Envia uma mensagem para o electron indicando que a página foi fechada e deve limpar os listeners

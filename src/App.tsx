@@ -6,10 +6,11 @@ function App() {
 
   const testeIpc = () => {
     console.log('ipc')
+
     ipcService.initializePageListener('serial-page')
       .subscribe({
         next: () => {
-          console.log('redy');
+          console.log('ready');
         }, error: () => {
           console.log('error');
         }

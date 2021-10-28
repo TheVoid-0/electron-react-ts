@@ -13,8 +13,9 @@ function createWindow() {
         height: 600,
         backgroundColor: '#fff',
         webPreferences: {
-            nodeIntegration: true,
-            contextIsolation: false
+            nodeIntegration: false,
+            contextIsolation: true,
+            preload: path.join(__dirname, "preload.js")
         }
     })
     usbNgElectronApp.addWindow(mainWindow);
