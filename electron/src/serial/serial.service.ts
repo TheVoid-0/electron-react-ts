@@ -1,6 +1,6 @@
 import { BrowserWindow } from 'electron';
 import { usbNgElectronApp } from '../app';
-import { serialProvider } from '../common/services/serial.provider'
+import { serialProvider } from '../../common/services/serial.provider'
 
 // TODO: Criar as classes com as dependências no construtor e exportar elas instanciando as dependências necessárias
 // TODO: Deixar as funções do service como async
