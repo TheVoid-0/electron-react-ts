@@ -11,6 +11,15 @@ function App() {
       .subscribe({
         next: () => {
           console.log('ready');
+          ipcService.sendAndExpectResponse('serial-page-get-ports').subscribe(({ body }) => {
+            console.log('ports', body.ports);
+            ipcService.sendAndExpectResponse('serial-page-post-open-port', body.ports[0]).subscribe(({ body }) => {
+              console.log('ready', body)
+              ipcService.sendAndExpectResponse('serial-page-post-led-status', '@').subscribe(({ body }) => {
+                console.log('resposta post data', body)
+              })
+            })
+          })
         }, error: () => {
           console.log('error');
         }
@@ -40,7 +49,7 @@ function App() {
         </div>
 
         <div className="qtde-section">
-          <label><span className="qtde">{ qtdeDetectada }</span> presenças detectadas</label>
+          <label><span className="qtde">{qtdeDetectada}</span> presenças detectadas</label>
         </div>
 
         <div className="exportar-section">

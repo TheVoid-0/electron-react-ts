@@ -3,6 +3,7 @@ import { SerialService } from "./serial.service";
 import { Service } from 'typedi';
 import { IpcMainService } from "../common/services/ipc-main.service";
 
+// TODO: Criar um DTO para padronizar a entrada de dados em todos os endpoints e criar mensagens de erro ao receber parametros inexperados
 @Service()
 export class Serial {
     private channel: string = 'serial-page';

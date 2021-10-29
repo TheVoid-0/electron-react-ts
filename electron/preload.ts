@@ -3,6 +3,8 @@ const {
     ipcRenderer,
 } = require('electron');
 
+// TODO: Colocar o arquivo de preload em um lugar adequado dentro do projeto
+// TODO: passar uma função de remove listener para o ipcService e enteder como funciona o return () => removeListener
 // TODO: arrumar interface do listener para especificar corretamente os parametros
 contextBridge.exposeInMainWorld(
     "ipc", {
