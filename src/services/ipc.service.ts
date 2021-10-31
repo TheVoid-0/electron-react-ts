@@ -14,22 +14,8 @@ class IpcService {
             this._ipc.isAvailable = true;
             console.log(this._ipc)
         } else {
-            // throw new Error('Electron\'s IPC is was not loaded');
             console.warn('Electron\'s IPC is was not loaded');
-            this._ipc = this.ipcNotAvailable();
-        }
-    }
-
-    /**
-     * Solução temporária
-     * @returns uma instância do IPC que não possui nenhuma funcionalidade e tem sua propriedade isAvailable como false
-     */
-    private ipcNotAvailable(): IpcRenderer {
-        return {
-            send: (channel: string, ...data: any[]) => { },
-            on: (channel: string, listener: (...args: any[]) => void) => () => { },
-            removeAllListeners: (channel: string) => { },
-            isAvailable: false
+            this._ipc = IpcRenderer.createIpcRenderer();
         }
     }
 
@@ -38,9 +24,6 @@ class IpcService {
     }
 
     public on(page: string, channel: string, listener: (...args: any[]) => void): void {
-        if (!this._ipc) {
-            return;
-        }
         this._ipc.on(channel, listener);
 
         // Verifica se já existe um listener dessa página, se sim adiciona esse canal aos listeners dessa página, se não, cria a página com esse canal como listener
@@ -48,19 +31,11 @@ class IpcService {
     }
 
     public send(channel: string, ...args: any[]): void {
-        if (!this._ipc) {
-            return;
-        }
         this._ipc.send(channel, ...args);
     }
 
     public sendAndExpectResponse(channel: string, ...args: any[]): Observable<IpcResponse> {
         return new Observable<IpcResponse>(subscriber => {
-            if (!this._ipc) {
-                subscriber.error('Electron ipc não foi carregado corretamente');
-                subscriber.complete();
-                return;
-            }
             this.createResponseListener(subscriber, channel);
             this._ipc.send(channel, ...args);
         });
@@ -73,7 +48,7 @@ class IpcService {
             subscriber.complete();
         }, 3000);
 
-        let unsub = this._ipc?.on(`${channel}-ready`, (event, args) => {
+        let unsub = this._ipc.on(`${channel}-ready`, (event, args) => {
             clearTimeout(timeout);
 
             if (args?.error) {
@@ -87,15 +62,15 @@ class IpcService {
     }
 
     public removeFromChannel(channel: string): void {
-        this._ipc?.removeAllListeners(channel);
+        this._ipc.removeAllListeners(channel);
     }
 
     public removeAllFromPage(page: string): void {
         for (const channel of this.listeners[page]) {
-            this._ipc?.removeAllListeners(channel);
+            this._ipc.removeAllListeners(channel);
         }
         delete this.listeners[page];
-        this._ipc?.send(`${page}-closed`);
+        this._ipc.send(`${page}-closed`);
     }
 
     /**
@@ -103,7 +78,7 @@ class IpcService {
      * @param page página que os listener devem ser fechados
      */
     public removeMainListener(page: string): void {
-        this._ipc?.send(`${page}-closed`);
+        this._ipc.send(`${page}-closed`);
     }
 
     public isAvailable(): boolean {
