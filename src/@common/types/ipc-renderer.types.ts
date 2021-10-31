@@ -29,18 +29,18 @@ export type IpcUnsubscribe = () => void;
  */
 export abstract class IpcRenderer {
     public readonly on = (channel: string, listener: (...args: any[]) => void): IpcUnsubscribe => {
-        return () => { }
+        throw new Error('Not implemented')
     }
 
     public readonly removeAllListeners = (channel: string): void => {
-
+        throw new Error('Not implemented')
     }
 
     public readonly send = (channel: string, ...data: any[]): void => {
-
+        throw new Error('Not implemented')
     }
 
-    public readonly isAvailable = (): boolean => { return false };
+    public abstract isAvailable: ()  => boolean;
 
     public static createIpcRenderer(ipcRenderer?: Electron.IpcRenderer): IpcRenderer {
         if (!ipcRenderer) {
