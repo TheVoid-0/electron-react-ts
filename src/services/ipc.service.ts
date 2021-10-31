@@ -1,6 +1,6 @@
 import { Observable, Subscriber } from 'rxjs';
 
-import { IpcRenderer, IpcResponse } from '../../electron/api/ipc-renderer/ipc-renderer.types'
+import { IpcRenderer, IpcResponse } from '../@common/types/ipc-renderer.types'
 
 class IpcService {
 
@@ -9,10 +9,9 @@ class IpcService {
 
     constructor() {
         console.log('service constructor code')
-        if ((window as any).ipc) {
-            this._ipc = (window as any).ipc as IpcRenderer;
-            this._ipc.isAvailable = true;
-            console.log(this._ipc)
+        if ((window as any).ipcApi) {
+            this._ipc = (window as any).ipcApi as IpcRenderer;
+            console.log('ipcRenderer', this._ipc)
         } else {
             console.warn('Electron\'s IPC is was not loaded');
             this._ipc = IpcRenderer.createIpcRenderer();
@@ -20,7 +19,7 @@ class IpcService {
     }
 
     public static isIpcAvailable(): boolean {
-        return !!(window as any).ipc
+        return !!((window as any).ipcApi as IpcRenderer).isAvailable();
     }
 
     public on(page: string, channel: string, listener: (...args: any[]) => void): void {
@@ -82,7 +81,7 @@ class IpcService {
     }
 
     public isAvailable(): boolean {
-        return this._ipc.isAvailable;
+        return this._ipc.isAvailable();
     }
 
 
@@ -98,4 +97,5 @@ class IpcService {
     }
 }
 
+console.log('static check', IpcService.isIpcAvailable());
 export default new IpcService();

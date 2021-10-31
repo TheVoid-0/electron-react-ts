@@ -1,7 +1,7 @@
 {
   "name": "desktop-app",
   "version": "0.1.0",
-  "main": "./build/electron/main.js",
+  "main": "./build/electron/electron/main.js",
   "private": true,
   "build": {
     "appId": "fedima.electron-usb-interface",
@@ -21,11 +21,11 @@
     "eject": "react-scripts eject",
     "pack": "electron-builder --dir",
     "dist": "electron-builder",
-    "electron": "tsc -p ./electron/tsconfig.json && electron ./build/electron/main.js",
+    "electron": "tsc -p ./electron/tsconfig.json && electron ./build/electron/electron/main.js",
     "electron:watch": "npm-run-all -p react-start electron:serve ",
     "electron:build:prod": "npm run build && tsc && electron-builder",
     "electron:build": "tsc -p ./electron/tsconfig.json",
-    "electron:serve": "wait-on http-get://localhost:3000/ && npm run electron:build && electron ./build/electron/main.js --watch",
+    "electron:serve": "wait-on http-get://localhost:3000/ && npm run electron:build && electron ./build/electron/electron/electron/main.js --watch",
     "electron:rebuild": "./node_modules/.bin/electron-rebuild"
   },
   "dependencies": {

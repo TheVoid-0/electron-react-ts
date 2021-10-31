@@ -15,7 +15,7 @@ function createWindow() {
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
-            preload: path.join(__dirname, "preload.js")
+            preload: path.join(__dirname, "api/ipc-renderer/ipc-renderer-preload.js")
         }
     })
     usbNgElectronApp.addWindow(mainWindow);
@@ -27,7 +27,7 @@ function createWindow() {
         mainWindow.loadURL('http://localhost:3000');
 
     } else {
-        mainWindow.loadFile(path.join(__dirname, '..', 'index.html'));
+        mainWindow.loadFile(path.join(__dirname, '..', '..', 'index.html'));
     }
 
     // Abre o inspecionador.

@@ -13,7 +13,7 @@ export class Serial {
         console.log('serial constructor', this._ipcMainService)
 
         // Cria a rota principal desse módulo que irá inicializar as outras rotas quando solicitada
-        this._ipcMainService.initializePageListener(this.channel, async (event) => this.setupRoutes.bind(this, event));
+        this._ipcMainService.initializePageListener(this.channel, this.setupRoutes.bind(this));
     }
 
     private async setupRoutes(initialEvent: IpcMainEvent) {

@@ -1,5 +1,6 @@
 import { ipcRenderer, contextBridge } from "electron";
-import { IpcRenderer } from "./ipc-renderer.types";
+import { IpcRenderer } from "../../../src/@common/types/ipc-renderer.types";
 
-
-contextBridge.exposeInMainWorld('ipc', IpcRenderer.createIpcRenderer(ipcRenderer));
+let ipc = IpcRenderer.createIpcRenderer(ipcRenderer);
+console.log("ipc renderer created", ipc);
+contextBridge.exposeInMainWorld('ipcApi', {...ipc});
