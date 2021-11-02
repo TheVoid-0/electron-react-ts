@@ -13,13 +13,17 @@ class IpcService {
             this._ipc = (window as any).ipcApi as IpcRenderer;
             console.log('ipcRenderer', this._ipc)
         } else {
-            console.warn('Electron\'s IPC is was not loaded');
             this._ipc = IpcRenderer.createIpcRenderer();
+            console.warn('Electron\'s IPC is was not loaded', this._ipc);
         }
     }
 
     public static isIpcAvailable(): boolean {
-        return !!((window as any).ipcApi as IpcRenderer).isAvailable();
+        const ipcApi = ((window as any).ipcApi as IpcRenderer | undefined);
+        if(!ipcApi) {
+            return false;
+        }
+        return ipcApi.isAvailable();
     }
 
     public on(page: string, channel: string, listener: (...args: any[]) => void): void {
@@ -88,14 +92,14 @@ class IpcService {
     /**
      * Envia uma mensagem pelo ipc do electron para indicar que essa página foi inicializada e transmite a mensagem através de um observable quando obtém resposta
      * 
-     * @param page nome da página na qual o electron precisa saber que foi inicializada. IMPORTANTE: esse nome deve ser igual ao que o listener do electron espera
+     * @param module nome do módulo no qual o electron precisa saber que foi inicializado. IMPORTANTE: esse nome deve ser igual ao que o listener do electron espera
      */
-    public initializePageListener(page: string): Observable<IpcResponse> {
+    public initializeModuleListener(module: string): Observable<IpcResponse> {
         // Garante que haverá somente um listener da página no main process do electron
-        this.removeMainListener(page);
-        return this.sendAndExpectResponse(page);
+        this.removeMainListener(module);
+        return this.sendAndExpectResponse(module);
     }
 }
 
-console.log('static check', IpcService.isIpcAvailable());
+console.log('ipc service static check', IpcService.isIpcAvailable());
 export default new IpcService();

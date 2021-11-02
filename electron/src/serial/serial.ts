@@ -8,7 +8,7 @@ import { IpcMainEvent } from "electron";
 // TODO: Ajustar as depreciações do toPromise do Observable
 @Service()
 export class Serial {
-    private channel: string = 'serial-page';
+    private channel: string = 'serial-module';
     constructor(private _ipcMainService: IpcMainService) {
         console.log('serial constructor', this._ipcMainService)
 
@@ -31,41 +31,41 @@ export class Serial {
         serialService.setupListeners(usbNgElectronApp.getMainWindow());
 
         // Rotas do controller interno que será adicionado após a entrada na página
-        this._ipcMainService.on(this.channel, 'serial-page-get-ports', (event) => {
+        this._ipcMainService.on(this.channel, 'serial-module-get-ports', (event) => {
             console.log('buscando portas...');
 
             serialService.findPorts().then((ports) => {
-                event.sender.send('serial-page-get-ports-ready', { ports: ports });
+                event.sender.send('serial-module-get-ports-ready', { ports: ports });
             })
         });
 
-        this._ipcMainService.on(this.channel, 'serial-page-post-autoread', (event, args) => {
+        this._ipcMainService.on(this.channel, 'serial-module-post-autoread', (event, args) => {
 
             serialService.sendCommand(args).toPromise().then(() => {
-                event.sender.send('serial-page-post-autoread-ready', { message: 'success' });
+                event.sender.send('serial-module-post-autoread-ready', { message: 'success' });
             }).catch((error) => {
-                event.sender.send('serial-page-post-autoread-ready', { error: error, message: 'error' });
+                event.sender.send('serial-module-post-autoread-ready', { error: error, message: 'error' });
             });
         });
 
-        this._ipcMainService.on(this.channel, 'serial-page-post-open-port', (event, args: { path: string }) => {
+        this._ipcMainService.on(this.channel, 'serial-module-post-open-port', (event, args: { path: string }) => {
             console.log('args open-port', args);
             serialService.open(args.path).then((port) => {
-                event.sender.send('serial-page-post-open-port-ready', { message: 'success' });
+                event.sender.send('serial-module-post-open-port-ready', { message: 'success' });
             }).catch(error => {
                 console.log(error);
-                event.sender.send('serial-page-post-open-port-ready', { error: error, message: 'error' });
+                event.sender.send('serial-module-post-open-port-ready', { error: error, message: 'error' });
             });
         });
 
-        this._ipcMainService.on(this.channel, 'serial-page-post-led-status', (event, args) => {
+        this._ipcMainService.on(this.channel, 'serial-module-post-led-status', (event, args) => {
             console.log('enviando na porta serial', args);
             serialService.sendCommand(args).toPromise().then(() => {
                 console.log('sucesso');
-                event.sender.send('serial-page-post-led-status-ready', { message: 'success' });
+                event.sender.send('serial-module-post-led-status-ready', { message: 'success' });
             }).catch(error => {
                 console.log(error);
-                event.sender.send('serial-page-post-led-status-ready', { error: error, message: 'error' });
+                event.sender.send('serial-module-post-led-status-ready', { error: error, message: 'error' });
             })
         })
 

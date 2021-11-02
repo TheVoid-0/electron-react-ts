@@ -28,19 +28,19 @@ export type IpcUnsubscribe = () => void;
  * As funções não podem ficar no prototype (tipo do objeto) pois esse "tipo" não será passado pela bridge API, resultando na perda de toda a informação armazenada no tipo, dessa forma, é necessário guardar as funções em propriedades da própria instância do objeto, onde estarão disponíveis independentemente da classe.
  */
 export abstract class IpcRenderer {
-    public readonly on = (channel: string, listener: (...args: any[]) => void): IpcUnsubscribe => {
+    public on = (channel: string, listener: (...args: any[]) => void): IpcUnsubscribe => {
         throw new Error('Not implemented')
     }
 
-    public readonly removeAllListeners = (channel: string): void => {
+    public removeAllListeners = (channel: string): void => {
         throw new Error('Not implemented')
     }
 
-    public readonly send = (channel: string, ...data: any[]): void => {
+    public send = (channel: string, ...data: any[]): void => {
         throw new Error('Not implemented')
     }
 
-    public abstract isAvailable: ()  => boolean;
+    public abstract isAvailable: () => boolean;
 
     public static createIpcRenderer(ipcRenderer?: Electron.IpcRenderer): IpcRenderer {
         if (!ipcRenderer) {
@@ -53,10 +53,7 @@ export abstract class IpcRenderer {
 class IpcRendederAvailable extends IpcRenderer {
     // private ipcRenderer: Electron.IpcRenderer
 
-    public on;
-    public removeAllListeners;
-    public send
-    public readonly isAvailable
+    public readonly isAvailable: () => boolean;
 
     constructor(ipcRenderer: Electron.IpcRenderer) {
         super()
@@ -69,6 +66,7 @@ class IpcRendederAvailable extends IpcRenderer {
             // Retorna uma função para se 'desinscrevermos' ou seja, remover o listener usando sua 'subscription'
             return () => {
                 ipcRenderer.removeListener(channel, subscription);
+                console.log(`the on listener ${channel} was removed`);
             }
         }
 
