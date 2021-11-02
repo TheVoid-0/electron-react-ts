@@ -88,6 +88,14 @@ class IpcService {
         return this._ipc.isAvailable();
     }
 
+    public runIfAvailable(fc: (...args: any[]) => void) {
+        if (!this.isAvailable()) {
+            return 'Ipc não está disponível'
+        }
+
+        fc();
+
+    }
 
     /**
      * Envia uma mensagem pelo ipc do electron para indicar que essa página foi inicializada e transmite a mensagem através de um observable quando obtém resposta

@@ -85,6 +85,7 @@ export class SerialService {
         return serialProvider.sendData(`c${data}\n`);
     }
 
+    // TODO: Verificar o cleanup da serial port
     public open(path: string) {
         usbNgElectronApp.onTerminate(this.cleanup);
         return serialProvider.open(path);

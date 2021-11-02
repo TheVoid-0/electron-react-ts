@@ -6,20 +6,32 @@ function SelectPresence() {
     const isIpcAvailableRef = useRef(isIpcAvailable);
 
     useEffect(() => {
-        console.log('ipcAvailableRef', isIpcAvailableRef.current);
-        setIpcAvailable(ipcService.isAvailable())
-        console.log('ipcAvailableRef', isIpcAvailableRef.current);
+        const isIpcAvailable = ipcService.isAvailable();
+        setIpcAvailable(isIpcAvailable)
+        isIpcAvailableRef.current = isIpcAvailable;
         if (isIpcAvailableRef.current) {
             ipcService.initializeModuleListener('serial-module').subscribe(
                 {
                     next: () => {
                         console.log('serial-module ready');
+                        getPorts()
                     },
                     error: (err) => console.log(err, 'serial-module error')
                 }
             )
         }
-    }, [])
+    }, []);
+
+    const getPorts = () => {
+        ipcService.sendAndExpectResponse('serial-module-get-ports').subscribe(
+            {
+                next: (body) => {
+                    console.log('ports: ', body);
+                },
+                error: (err) => console.log(err)
+            }
+        )
+    }
 
     return (
         <div>

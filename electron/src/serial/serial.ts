@@ -17,7 +17,7 @@ export class Serial {
     }
 
     private async setupRoutes(initialEvent: IpcMainEvent) {
-        console.log('Criando rotas da página');
+        console.log('Criando rotas do modulo');
 
         this._ipcMainService.on(this.channel, `${this.channel}-closed`, () => {
             this._ipcMainService.removeAllFromPage(this.channel);

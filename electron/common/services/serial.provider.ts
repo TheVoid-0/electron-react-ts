@@ -28,7 +28,7 @@ export class SerialProvider {
     }
 
     public async open(path: string, options?: SerialPort.OpenOptions): Promise<SerialPort> {
-        if (this.portOpened?.path === path) {
+        if (this.portOpened != undefined && this.portOpened.path === path) {
             console.log('porta já esta aberta', this.portOpened);
             return Promise.resolve(this.portOpened);
         }

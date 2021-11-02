@@ -75,7 +75,7 @@ class IpcRendederAvailable extends IpcRenderer {
         }
 
         this.send = (channel: string, ...data: any[]) => {
-            ipcRenderer.send(channel, data);
+            ipcRenderer.send(channel, ...data);
         }
 
         this.isAvailable = (): boolean => { return true };

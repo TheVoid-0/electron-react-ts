@@ -15,6 +15,7 @@
   },
   "scripts": {
     "start": "react-scripts build && npm run electron",
+    "start:watch" : "electron:watch",
     "react-start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
@@ -25,7 +26,7 @@
     "electron:watch": "npm-run-all -p react-start electron:serve ",
     "electron:build:prod": "npm run build && tsc && electron-builder",
     "electron:build": "tsc -p ./electron/tsconfig.json",
-    "electron:serve": "wait-on http-get://localhost:3000/ && npm run electron:build && electron ./build/electron/electron/electron/main.js --watch",
+    "electron:serve": "wait-on http-get://localhost:3000/ && npm run electron:build && electron ./build/electron/electron/main.js --watch",
     "electron:rebuild": "./node_modules/.bin/electron-rebuild"
   },
   "dependencies": {
