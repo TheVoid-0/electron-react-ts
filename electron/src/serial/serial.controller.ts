@@ -39,6 +39,15 @@ export class SerialController {
         event.sender.send(SERIAL_ROUTES.POST_OPEN_PORT, { message: 'success' });
     }
 
+    public async closePort(event: IpcMainEvent, path?: string) {
+        console.log('fechando porta', path);
+        this.serialService.closePort(path).
+            then(() =>
+                event.sender.send(SERIAL_ROUTES.POST_CLOSE_PORT, { message: 'success' }))
+            .catch((error: any) =>
+                event.sender.send(SERIAL_ROUTES.POST_CLOSE_PORT, { error: error, message: 'error' }));
+    }
+
     public async postLedStatus(event: IpcMainEvent, data: string) {
         firstValueFrom(this.serialService.sendCommand(data)).then(() => {
             event.sender.send(SERIAL_ROUTES.POST_AUTOREAD, { message: 'success' });

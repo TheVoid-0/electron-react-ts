@@ -12,7 +12,7 @@ export class SerialService {
 
     constructor(private serialProvider: SerialProvider) {
         console.log('serialService constructor');
-     }
+    }
 
     private readInfo(data: string, window: BrowserWindow) {
         switch (data[0]) {
@@ -94,6 +94,10 @@ export class SerialService {
     public async open(path: string) {
         usbNgElectronApp.onTerminate(this.cleanup);
         return await this.serialProvider.open(path);
+    }
+
+    public async closePort(path?: string) {
+        await this.serialProvider.closePort();
     }
 
     private cleanup() {

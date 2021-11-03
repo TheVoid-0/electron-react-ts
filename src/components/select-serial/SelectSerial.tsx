@@ -1,4 +1,4 @@
-import React, { Dispatch, FC, SetStateAction, useEffect, useRef, useState } from "react";
+import React, { Dispatch, FC, MouseEvent, SetStateAction, useEffect, useRef, useState } from "react";
 import { SERIAL_ROUTES } from "../../@common/routes/serial-routes";
 import ipcService from "../../services/ipc.service";
 import './SelectSerial.css';
@@ -7,13 +7,17 @@ interface ISelectSerial {
     isVisibleSelectSerial: boolean,
     setVisibleSelectSerial: Dispatch<SetStateAction<boolean>>
     setVisibleDetectPresence: Dispatch<SetStateAction<boolean>>
+    selectedPort: string
+    setSelectedPort: Dispatch<SetStateAction<string>>
 }
 
 const SelectSerial: FC<ISelectSerial> = (props) => {
     const [isIpcAvailable, setIpcAvailable] = useState(false);
 
-    const [selectedPort, setSelectedPort] = useState("");
     const [comPorts, setComPorts] = useState([]);
+
+    // loadings
+    const [isBtnConectarLoading, setBtnConectarLoading] = useState(false);
 
     useEffect(() => {
         console.log('mount selectSerial');
@@ -32,7 +36,9 @@ const SelectSerial: FC<ISelectSerial> = (props) => {
         }
         return () => {
             console.log('unmount selectSerial');
-            ipcService.removeMainListener(SERIAL_ROUTES.MODULE.destroy)
+            if (isIpcAvailable) {
+                ipcService.removeMainListener(SERIAL_ROUTES.MODULE.destroy)
+            }
         }
     }, []);
 
@@ -49,14 +55,34 @@ const SelectSerial: FC<ISelectSerial> = (props) => {
     }
 
     const openPort = () => {
-        ipcService.sendAndExpectResponse(SERIAL_ROUTES.POST_OPEN_PORT, selectedPort)
-        .subscribe({
-            next: () => {
-                console.log('Porta aberta!');
-                // showDetection();
-            }, 
-            error: (error) => console.log('Não foi possível abrir a porta: ', error) // TODO: Colocar mensagem de erro na tela
-        })
+        setBtnConectarLoading(true);
+        ipcService.sendAndExpectResponse(SERIAL_ROUTES.POST_OPEN_PORT, props.selectedPort)
+            .subscribe({
+                next: () => {
+                    console.log('Porta aberta!');
+                    setBtnConectarLoading(false);
+                    showDetection();
+                },
+                error: (error) => {
+                    setBtnConectarLoading(false)
+                    console.log('Não foi possível abrir a porta: ', error) // TODO: Colocar mensagem de erro na tela
+                }
+            })
+    }
+
+    const closePort = () => {
+        setBtnConectarLoading(true);
+        ipcService.sendAndExpectResponse(SERIAL_ROUTES.POST_CLOSE_PORT, props.selectedPort)
+            .subscribe({
+                next: () => {
+                    console.log('Porta Fechada!');
+                    setBtnConectarLoading(false);
+                },
+                error: (error) => {
+                    console.log('Não foi possível fechar a porta: ', error) // TODO: Colocar mensagem de erro na tela
+                    setBtnConectarLoading(false)
+                }
+            })
     }
 
     const showDetection = () => {
@@ -73,15 +99,18 @@ const SelectSerial: FC<ISelectSerial> = (props) => {
 
                         <div>
                             <small>Portas disponíveis:</small>
-                            <select value={selectedPort} onChange={(event) => { setSelectedPort(event.target.value) }}>
+                            <select value={props.selectedPort} onChange={(event) => { props.setSelectedPort(event.target.value) }}>
                                 <option value="0" selected>{comPorts.length > 0 ? 'Selecione uma porta...' : 'Nenhuma porta disponível!'}</option>
                                 {comPorts.map((port: any) => (<option>{port.path}</option>))}
                             </select>
                         </div>
 
                         <div className="conectar-section">
-                            <button className="btn" onClick={openPort}>
-                                Conectar
+                            <button className="btn" disabled={isBtnConectarLoading} onClick={openPort}>
+                                {isBtnConectarLoading ? 'Aguarde...' : 'Conectar'}
+                            </button>
+                            <button className="btn" disabled={isBtnConectarLoading} onClick={closePort}>
+                                {isBtnConectarLoading ? 'Aguarde...' : 'Desconectar'}
                             </button>
                         </div>
                     </div>

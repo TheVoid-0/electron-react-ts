@@ -103,7 +103,13 @@ export class SerialProvider {
     }
 
     public closePort() {
-        this.portOpened?.close();
+        return new Promise<void>((resolve, reject) => {
+            this.portOpened?.close((error) => {
+                if (error) reject(error);
+                this.portOpened = undefined;
+                resolve();
+            });
+        })
     }
 
     /**

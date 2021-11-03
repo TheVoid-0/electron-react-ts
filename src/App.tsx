@@ -8,6 +8,8 @@ function App() {
   const [isVisibleSelectSerial, setVisibleSelectSerial] = useState(true);
   const [isVisibleDetectPresence, setVisibleDetectPresence] = useState(false);
 
+  const [selectedPort, setSelectedPort] = useState("");
+
   return (
     <div className="App">
       <h3>DETECTOR DE PRESENÇA</h3>
@@ -17,7 +19,10 @@ function App() {
           <SelectSerial
             isVisibleSelectSerial={isVisibleSelectSerial}
             setVisibleSelectSerial={setVisibleSelectSerial}
-            setVisibleDetectPresence={setVisibleDetectPresence}>
+            setVisibleDetectPresence={setVisibleDetectPresence}
+            selectedPort={selectedPort}
+            setSelectedPort={setSelectedPort}
+          >
           </SelectSerial>
           : null
       }

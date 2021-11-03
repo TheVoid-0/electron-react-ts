@@ -4,5 +4,6 @@ export const SERIAL_ROUTES = {
     GET_PORTS: 'serial_module_get_ports',
     POST_AUTOREAD: 'serial_module_post_autoread',
     POST_OPEN_PORT: 'serial_module_post_open_port',
+    POST_CLOSE_PORT: 'serial_module_post_close_port',
     POST_LED_STATUS: 'serial_module_post_led_status'
 }

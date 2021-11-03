@@ -41,6 +41,8 @@ export class Serial {
 
         this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_OPEN_PORT, serialController.openPort.bind(serialController));
 
+        this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_CLOSE_PORT, serialController.closePort.bind(serialController));
+
         this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_LED_STATUS, serialController.postLedStatus.bind(serialController));
 
         // Avisa que o módulo preparou as rotas para as funcionalidades
