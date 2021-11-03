@@ -1,8 +1,14 @@
-import React from 'react';
+import React, { FC } from 'react';
 import './DetectPresence.css';
 import ipcService from '../../services/ipc.service';
 
-function DetectPresence() {
+interface IDetectPresence {
+    isVisibleDetectPresence: boolean,
+    setVisibleSelectSerial: (isVibleSelectSerial: boolean) => void,
+    setVisibleDetectPresence: (isVisibleDetectPresence: boolean) => void
+}
+
+const DetectPresence: FC<IDetectPresence> = (props) => {
 
     const testeIpc = () => {
         console.log('ipc')
@@ -28,30 +34,44 @@ function DetectPresence() {
 
     testeIpc();
 
+    const showSelection = () => {
+        props.setVisibleDetectPresence(false);
+        props.setVisibleSelectSerial(true);
+    }
+
     let qtdeDetectada = 5;
     let statusSistema = 'desligado';
     let statusDeteccao = 'off';
 
     return (
-        <div>
-            <div>
-                <strong>Status: <span className={statusSistema}>{statusSistema}</span></strong>
-                <hr></hr>
-            </div>
+        <div className={props.isVisibleDetectPresence ? 'show detection-content' : 'hide'}>
+            <div className="card">
 
-            <div className="deteccao-section">
-                <strong>Detecção:</strong>
-                <div className={statusDeteccao + ' led'}></div>
-            </div>
+                <div className="link-voltar">
+                    <a onClick={showSelection}>Trocar porta serial</a>
+                </div>
 
-            <div className="qtde-section">
-                <label><span className="qtde">{qtdeDetectada}</span> presenças detectadas</label>
-            </div>
+                <div>
+                    <strong>Status: <span className={statusSistema}>{statusSistema}</span></strong>
+                    <hr></hr>
+                </div>
 
-            <div className="exportar-section">
-                <button className="btn exportar">
-                    Exportar arquivo
-                </button>
+                <div className="deteccao-section">
+                    <strong>Detecção:</strong>
+                    <div className={statusDeteccao + ' led'}></div>
+                </div>
+
+                <div className="qtde-section">
+                    <label><span className="qtde">{qtdeDetectada}</span> presenças detectadas</label>
+                </div>
+
+                <div className="exportar-section">
+                    <button className="btn exportar">
+                        {/* todo: fazer exportar o arquivo txt */}
+                        Exportar arquivo
+                    </button>
+                </div>
+
             </div>
         </div>
     );

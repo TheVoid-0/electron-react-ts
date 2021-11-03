@@ -3,3 +3,14 @@
     display: flex;
     justify-content: center;
 }
+
+.selection-content {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    position: absolute;
+}
+
+.selection-content .card {
+    width: 300px;
+}

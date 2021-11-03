@@ -44,3 +44,29 @@
     display: flex;
     justify-content: center;
 }
+
+.link-voltar {
+    text-align: end;
+}
+
+.link-voltar a {
+    color: rgb(169, 169, 169);
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all .4s;
+}
+
+.link-voltar a:hover {
+    color: #333834;
+}
+
+.detection-content {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    position: absolute;
+}
+.detection-content .card {
+    width: 300px;
+}
