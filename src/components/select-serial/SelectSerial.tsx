@@ -25,7 +25,7 @@ function SelectPresence() {
     const getPorts = () => {
         ipcService.sendAndExpectResponse('serial-module-get-ports').subscribe(
             {
-                next: (body) => {
+                next: ({ body }) => {
                     console.log('ports: ', body);
                 },
                 error: (err) => console.log(err)
