@@ -9,7 +9,7 @@ import { SERIAL_ROUTES } from "./serial-routes";
 // TODO: Ajustar as depreciações do toPromise do Observable
 @Service()
 export class Serial {
-    private channel: string = SERIAL_ROUTES.MODULE.root;
+    private channel: string = SERIAL_ROUTES.MODULE.init;
     constructor(private _ipcMainService: IpcMainService) {
         console.log('serial constructor', this._ipcMainService)
 
@@ -32,16 +32,16 @@ export class Serial {
         serialService.setupListeners(usbNgElectronApp.getMainWindow());
 
         // Rotas do controller interno que será adicionado após a entrada na página
-        this._ipcMainService.on(this.channel, SERIAL_ROUTES.GET_PORTS.req, serialService.findPorts);
+        this._ipcMainService.on(this.channel, SERIAL_ROUTES.GET_PORTS, serialService.findPorts);
 
-        this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_AUTOREAD.req, serialService.sendCommand);
+        this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_AUTOREAD, serialService.sendCommand);
 
-        this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_OPEN_PORT.req, serialService.open);
+        this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_OPEN_PORT, serialService.open);
 
-        this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_LED_STATUS.req, serialService.sendCommand);
+        this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_LED_STATUS, serialService.sendCommand);
 
         // Avisa que o módulo preparou as rotas para as funcionalidades
-        initialEvent.sender.send(SERIAL_ROUTES.MODULE.res);
+        initialEvent.sender.send(this.channel);
 
     }
 

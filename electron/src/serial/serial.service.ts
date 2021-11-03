@@ -80,7 +80,7 @@ export class SerialService {
         console.log('buscando portas...');
 
         let ports = await serialProvider.findPorts();
-        event.sender.send(SERIAL_ROUTES.GET_PORTS.res, { ports: ports });
+        event.sender.send(SERIAL_ROUTES.GET_PORTS, { ports: ports });
     }
 
     public sendData(data: string) {
@@ -89,9 +89,9 @@ export class SerialService {
 
     public async sendCommand(event: IpcMainEvent, data: string) {
         firstValueFrom(serialProvider.sendData(`c${data}\n`)).then(() => {
-            event.sender.send(SERIAL_ROUTES.POST_AUTOREAD.res, { message: 'success' });
+            event.sender.send(SERIAL_ROUTES.POST_AUTOREAD, { message: 'success' });
         }).catch((error) => {
-            event.sender.send(SERIAL_ROUTES.POST_AUTOREAD.res, { error: error, message: 'error' });
+            event.sender.send(SERIAL_ROUTES.POST_AUTOREAD, { error: error, message: 'error' });
         })
     }
 
@@ -102,10 +102,10 @@ export class SerialService {
 
         let port = await serialProvider.open(path).catch((error) => {
             console.log(error);
-            event.sender.send(SERIAL_ROUTES.POST_OPEN_PORT.res, { error: error, message: 'error' });
+            event.sender.send(SERIAL_ROUTES.POST_OPEN_PORT, { error: error, message: 'error' });
         });
 
-        event.sender.send(SERIAL_ROUTES.POST_OPEN_PORT.res, { message: 'success' });
+        event.sender.send(SERIAL_ROUTES.POST_OPEN_PORT, { message: 'success' });
     }
 
     private cleanup() {
