@@ -27,12 +27,12 @@ export class Serial {
 
         // import SerialService
         // O SerialService não é importado na inicialização como dependência do módulo pois ele possui o SerialProvider como dependência que importa a biblioteca SerialPort. Utilizando o LazyLoad do service evitamos de importar um módulo na aplicação que não será utilizado (mesmo que nessa aplicação ele sempre seja)
-        const serialService: SerialService = Container.get((await import('./serial.service')).SerialService);
-
-        const serialController = new SerialController(serialService);
+        // const serialService: SerialService = Container.get((await import('./serial.service')).SerialService);
+        console.log('Container getting serialController');
+        const serialController = Container.get(SerialController);
 
         // Listeners do serial
-        serialService.setupListeners(usbNgElectronApp.getMainWindow());
+        serialController.setupSerialListeners(usbNgElectronApp.getMainWindow());
 
         // Rotas do controller interno que será adicionado após a entrada na página
         this._ipcMainService.on(this.channel, SERIAL_ROUTES.GET_PORTS, serialController.getPorts);

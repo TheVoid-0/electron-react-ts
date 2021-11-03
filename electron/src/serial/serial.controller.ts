@@ -1,12 +1,17 @@
 import { firstValueFrom } from 'rxjs'
-import { IpcMainEvent } from "electron";
+import { BrowserWindow, IpcMainEvent } from "electron";
 import { SERIAL_ROUTES } from "../../../src/@common/routes/serial-routes";
 import { SerialService } from "./serial.service";
+import { Service } from 'typedi';
 
 
-
+@Service()
 export class SerialController {
     constructor(private serialService: SerialService) {
+    }
+
+    public setupSerialListeners(window: BrowserWindow): void {
+        this.serialService.setupListeners(window);
     }
 
     public async getPorts(event: IpcMainEvent) {

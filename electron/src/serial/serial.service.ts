@@ -10,7 +10,9 @@ const DEVICE_PID = 'EA60'
 @Service()
 export class SerialService {
 
-    constructor(private serialProvider: SerialProvider) { }
+    constructor(private serialProvider: SerialProvider) {
+        console.log('serialService constructor');
+     }
 
     private readInfo(data: string, window: BrowserWindow) {
         switch (data[0]) {

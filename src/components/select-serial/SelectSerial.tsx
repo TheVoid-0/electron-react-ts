@@ -1,4 +1,5 @@
 import React, { FC, useEffect, useRef, useState } from "react";
+import { SERIAL_ROUTES } from "../../@common/routes/serial-routes";
 import ipcService from "../../services/ipc.service";
 import './SelectSerial.css';
 
@@ -17,7 +18,7 @@ const SelectSerial: FC<ISelectSerial> = (props) => {
         setIpcAvailable(isIpcAvailable)
         isIpcAvailableRef.current = isIpcAvailable;
         if (isIpcAvailableRef.current) {
-            ipcService.initializeModuleListener('serial-module').subscribe(
+            ipcService.initializeModuleListener(SERIAL_ROUTES.MODULE.init).subscribe(
                 {
                     next: () => {
                         console.log('serial-module ready');
@@ -30,7 +31,7 @@ const SelectSerial: FC<ISelectSerial> = (props) => {
     }, []);
 
     const getPorts = () => {
-        ipcService.sendAndExpectResponse('serial-module-get-ports').subscribe(
+        ipcService.sendAndExpectResponse(SERIAL_ROUTES.GET_PORTS).subscribe(
             {
                 next: ({ body }) => {
                     console.log('ports: ', body);
