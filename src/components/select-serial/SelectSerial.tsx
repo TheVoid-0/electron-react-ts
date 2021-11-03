@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import ipcService from "../../services/ipc.service";
+import './SelectSerial.css';
 
 function SelectPresence() {
     const [isIpcAvailable, setIpcAvailable] = useState(false);
@@ -36,9 +37,17 @@ function SelectPresence() {
     return (
         <div>
             {isIpcAvailable ?
-                <div>Selecionar Serial funcionando!</div>
+                <div>
+                    <p>Selecione uma porta serial para estabelecer a conexão</p>
+                    <div className="conectar-section">
+                        <button className="btn">
+                            Conectar
+                        </button>
+                    </div>
+                </div>
                 :
-                <div>O módulo de comunicação com o desktop não está disponível! </div>}
+                <div>O módulo de comunicação com o desktop não está disponível! </div>
+            }            
         </div>
     );
 }

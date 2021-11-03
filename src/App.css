@@ -19,4 +19,49 @@ body {
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
   background: rgb(99, 99, 99);
+}body {
+  background-color: #f8f8f8;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card {
+  border: solid 1px #ccc;
+  background-color: white;
+  padding: 20px;
+  overflow: auto;
+  border-radius: 5px;
+}
+
+.card-footer {
+  text-align: center;
+}
+
+.card-footer small {
+  display: block;
+  color: #808080;
+}
+
+hr {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border: 0;
+  border-top: 1px solid rgba(34, 41, 47, 0.1);
+}
+
+h3 {
+  color: #008db7;
+  text-align: center;
+}
+
+.btn {
+  background-color: #008db7;
+  color: white;
+  width: 200px;
+  padding: 10px;
+  border: none;
+  border-radius: 3px;
 }

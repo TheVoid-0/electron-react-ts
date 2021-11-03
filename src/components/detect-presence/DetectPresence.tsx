@@ -33,36 +33,25 @@ function DetectPresence() {
     let statusDeteccao = 'off';
 
     return (
-        <div className="App">
-            <div className="card">
-                <h3>DETECTOR DE PRESENÇA</h3>
+        <div>
+            <div>
+                <strong>Status: <span className={statusSistema}>{statusSistema}</span></strong>
                 <hr></hr>
+            </div>
 
-                <div>
-                    <strong>Status: <span className={statusSistema}>{statusSistema}</span></strong>
-                    <hr></hr>
-                </div>
+            <div className="deteccao-section">
+                <strong>Detecção:</strong>
+                <div className={statusDeteccao + ' led'}></div>
+            </div>
 
-                <div className="deteccao-section">
-                    <strong>Detecção:</strong>
-                    <div className={statusDeteccao + ' led'}></div>
-                </div>
+            <div className="qtde-section">
+                <label><span className="qtde">{qtdeDetectada}</span> presenças detectadas</label>
+            </div>
 
-                <div className="qtde-section">
-                    <label><span className="qtde">{qtdeDetectada}</span> presenças detectadas</label>
-                </div>
-
-                <div className="exportar-section">
-                    <button className="exportar">
-                        Exportar arquivo
-                    </button>
-                </div>
-
-                <hr></hr>
-                <div className="card-footer">
-                    <small>Desenvolvido por: Diovanna, Felipe P. e Marco</small>
-                    <small>Disciplina: Integração e Software-Hardware</small>
-                </div>
+            <div className="exportar-section">
+                <button className="btn exportar">
+                    Exportar arquivo
+                </button>
             </div>
         </div>
     );
