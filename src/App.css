@@ -5,100 +5,6 @@ body {
     font-family: Roboto, "Helvetica Neue", sans-serif;
 }
 
-body {
-  background-color: #f8f8f8;
-  height: 100vh;
-  width: 100vw;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.card {
-  border: solid 1px #ccc;
-  background-color: white;
-  padding: 20px;
-  overflow: auto;
-  border-radius: 5px;
-}
-
-.card-footer {
-  text-align: center;
-}
-
-.card-footer small {
-  display: block;
-  color: #808080;
-}
-
-hr {
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-  border: 0;
-  border-top: 1px solid rgba(34, 41, 47, 0.1);
-}
-
-h3 {
-  color: #008db7;
-  text-align: center;
-}
-
-.ligado {
-  color: #06ae27;
-  text-transform: capitalize;
-}
-
-.desligado {
-  color: #ae2506;
-  text-transform: capitalize;
-}
-
-.led {
-  height: 30px;
-  width: 30px;
-  border-radius: 50%;
-}
-
-.led.on {
-  background-color: #06ae27;
-}
-
-.led.off {
-  background-color: #333834;
-}
-
-.deteccao-section {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.qtde-section {
-  text-align: center;
-  margin-top: 1rem;
-}
-
-.qtde-section .qtde {
-  font-size: 24px;
-  font-weight: bold;
-  color: #008db7;
-}
-
-.exportar-section {
-  margin-top: 1rem;
-  display: flex;
-  justify-content: center;
-}
-
-.exportar {
-  background-color: #008db7;
-  color: white;
-  width: 200px;
-  padding: 10px;
-  border: none;
-  border-radius: 3px;
-}
-
 /* scroll */
 ::-webkit-scrollbar {
   width: 10px;
@@ -113,4 +19,101 @@ h3 {
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
   background: rgb(99, 99, 99);
+}body {
+  background-color: #f8f8f8;
+  align-items: center;
+  justify-content: center;
+}
+
+.card {
+  border: solid 1px #ccc;
+  background-color: white;
+  padding: 20px;
+  overflow: auto;
+  border-radius: 5px;
+}
+
+.footer {
+  bottom: 30px;
+  width: 100%;
+  position: fixed;
+  text-align: center;
+}
+
+.footer small {
+  display: block;
+  color: #808080;
+}
+
+hr {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border: 0;
+  border-top: 1px solid rgba(34, 41, 47, 0.1);
+}
+
+h3 {
+  color: #008db7;
+  text-align: center;
+  margin-top: 50px;
+  margin-bottom: 30px;
+}
+
+.btn {
+  background-color: #008db7;
+  color: white;
+  width: 200px;
+  padding: 10px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all .4s;
+}
+
+.btn:hover {
+  background-color: #016787;
+}
+
+.footer hr {
+  margin-bottom: 30px;
+}
+
+.show {
+  animation-name: fade-in;
+  animation-duration: 2s;
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+  opacity: 0;
+  left: -500px;
+}
+
+.hide {
+  animation-name: fade-out;
+  animation-duration: 2s;
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+  opacity: 1;
+  left: 0;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    left: -500px;
+  }
+  to {
+    opacity: 1;
+    left: 0;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+    left: 0;
+  }
+  to {
+    opacity: 0;
+    left: 500px;
+  }
 }

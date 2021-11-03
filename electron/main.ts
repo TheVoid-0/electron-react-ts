@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow } from 'electron';
 import * as path from 'path';
 import { usbNgElectronApp } from './src/app';
 
@@ -13,8 +13,9 @@ function createWindow() {
         height: 600,
         backgroundColor: '#fff',
         webPreferences: {
-            nodeIntegration: true,
-            contextIsolation: false
+            nodeIntegration: false,
+            contextIsolation: true,
+            preload: path.join(__dirname, "api/ipc-renderer/ipc-renderer-preload.js")
         }
     })
     usbNgElectronApp.addWindow(mainWindow);
@@ -26,7 +27,7 @@ function createWindow() {
         mainWindow.loadURL('http://localhost:3000');
 
     } else {
-        mainWindow.loadFile(path.join(__dirname, '..', 'index.html'));
+        mainWindow.loadFile(path.join(__dirname, '..', '..', 'index.html'));
     }
 
     // Abre o inspecionador.
