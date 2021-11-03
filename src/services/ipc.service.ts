@@ -78,10 +78,10 @@ class IpcService {
 
     /**
      * Envia uma mensagem para o electron indicando que a página foi fechada e deve limpar os listeners
-     * @param page página que os listener devem ser fechados
+     * @param moduleDestroyChannel canal onde o módulo espera o sinal para destruir os listeners
      */
-    public removeMainListener(page: string): void {
-        this._ipc.send(`${page}-closed`);
+    public removeMainListener(moduleDestroyChannel: string): void {
+        this._ipc.send(moduleDestroyChannel);
     }
 
     public isAvailable(): boolean {
@@ -103,8 +103,9 @@ class IpcService {
      * @param module nome do módulo no qual o electron precisa saber que foi inicializado. IMPORTANTE: esse nome deve ser igual ao que o listener do electron espera
      */
     public initializeModuleListener(module: string): Observable<IpcResponse> {
+        console.log('initializeModule:', module);
         // Garante que haverá somente um listener da página no main process do electron
-        this.removeMainListener(module);
+        this.removeMainListener(`${module}-closed`);
         return this.sendAndExpectResponse(module);
     }
 }

@@ -93,8 +93,6 @@ export class SerialService {
     // TODO: Verificar o cleanup da serial port
     public async open(path: string) {
         usbNgElectronApp.onTerminate(this.cleanup);
-        console.log('args open-port', path);
-
         return await this.serialProvider.open(path);
     }
 

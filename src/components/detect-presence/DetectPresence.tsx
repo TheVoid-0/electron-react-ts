@@ -1,38 +1,15 @@
-import React, { FC } from 'react';
+import React, { Dispatch, FC, SetStateAction, useEffect } from 'react';
 import './DetectPresence.css';
 import ipcService from '../../services/ipc.service';
 
 interface IDetectPresence {
     isVisibleDetectPresence: boolean,
-    setVisibleSelectSerial: (isVibleSelectSerial: boolean) => void,
-    setVisibleDetectPresence: (isVisibleDetectPresence: boolean) => void
+    setVisibleSelectSerial: Dispatch<SetStateAction<boolean>>
+    setVisibleDetectPresence: Dispatch<SetStateAction<boolean>>
 }
 
 const DetectPresence: FC<IDetectPresence> = (props) => {
 
-    const testeIpc = () => {
-        console.log('ipc')
-
-        ipcService.initializeModuleListener('serial-page')
-            .subscribe({
-                next: () => {
-                    console.log('ready');
-                    ipcService.sendAndExpectResponse('serial-page-get-ports').subscribe(({ body }) => {
-                        console.log('ports', body.ports);
-                        ipcService.sendAndExpectResponse('serial-page-post-open-port', body.ports[0]).subscribe(({ body }) => {
-                            console.log('ready', body)
-                            ipcService.sendAndExpectResponse('serial-page-post-led-status', '@').subscribe(({ body }) => {
-                                console.log('resposta post data', body)
-                            })
-                        })
-                    })
-                }, error: () => {
-                    console.log('error');
-                }
-            })
-    };
-
-    testeIpc();
 
     const showSelection = () => {
         props.setVisibleDetectPresence(false);

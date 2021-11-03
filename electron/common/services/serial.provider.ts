@@ -29,9 +29,10 @@ export class SerialProvider {
         return await this.serialPort.list();
     }
 
+    // TODO: Adicionar handling de duas ou mais portas abertas
     public async open(path: string, options?: SerialPort.OpenOptions): Promise<SerialPort> {
         if (this.portOpened != undefined && this.portOpened.path === path) {
-            console.log('porta já esta aberta', this.portOpened);
+            console.log('porta já esta aberta', this.portOpened.path);
             return Promise.resolve(this.portOpened);
         }
         return new Promise<SerialPort>((resolve, reject) => {

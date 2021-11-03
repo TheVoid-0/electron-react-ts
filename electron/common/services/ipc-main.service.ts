@@ -22,7 +22,7 @@ export class IpcMainService {
      * @param listener callback que será chamado quando uma "requisição" para esse módulo chegar, pode conter qualquer lógica de negócio e inicializar outros
      * listeners que aguardam novas requisições
      */
-    public initializePageListener(module: string, listener: (event: IpcMainEvent, ...args: any[]) => void) {
+    public initializeModuleListener(module: string, listener: (event: IpcMainEvent, ...args: any[]) => void) {
         // Garante que haverá somente um listener da módulo no main process do electron
         this.removeAllFromPage(module);
         this._ipcMain.on(module, listener);

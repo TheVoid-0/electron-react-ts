@@ -7,7 +7,6 @@ import { SERIAL_ROUTES } from "../../../src/@common/routes/serial-routes";
 import { SerialController } from "./serial.controller";
 
 // TODO: Criar um DTO para padronizar a entrada de dados em todos os endpoints e criar mensagens de erro ao receber parametros inexperados
-// TODO: Ajustar as depreciações do toPromise do Observable
 @Service()
 export class Serial {
     private channel: string = SERIAL_ROUTES.MODULE.init;
@@ -15,13 +14,14 @@ export class Serial {
         console.log('serial constructor', this._ipcMainService)
 
         // Cria a rota principal desse módulo que irá inicializar as outras rotas quando solicitada
-        this._ipcMainService.initializePageListener(this.channel, this.setupRoutes.bind(this));
+        this._ipcMainService.initializeModuleListener(this.channel, this.setupRoutes.bind(this));
     }
 
     private async setupRoutes(initialEvent: IpcMainEvent) {
         console.log('Criando rotas do modulo');
 
         this._ipcMainService.on(this.channel, SERIAL_ROUTES.MODULE.destroy, () => {
+            console.log('limpando rotas do módulo')
             this._ipcMainService.removeAllFromPage(this.channel);
         });
 
