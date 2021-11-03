@@ -14,3 +14,11 @@
 .selection-content .card {
     width: 300px;
 }
+
+select {
+    display: block;
+    border: solid 1px #ccc;
+    border-radius: 3px;
+    padding: 7px 15px;
+    width: 100%;
+}

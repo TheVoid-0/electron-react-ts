@@ -51,7 +51,16 @@ const SelectSerial: FC<ISelectSerial> = (props) => {
                 {isIpcAvailable ?
                     <div>
                         <p>Selecione uma porta serial para estabelecer a conexão</p>
-                        {/* todo: adicionar o select para escolher a porta que vai ser usada */}
+                        
+                        <div>
+                            <small>Portas disponíveis:</small>
+                            <select>
+                                <option>Selecione uma</option>
+                                <option>Porta 1</option>
+                                <option>Porta 2</option>
+                            </select>
+                        </div>
+
                         <div className="conectar-section">
                             <button className="btn" onClick={showDetection}>
                                 Conectar
