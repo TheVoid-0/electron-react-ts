@@ -60,14 +60,30 @@ const SelectSerial: FC<ISelectSerial> = (props) => {
             .subscribe({
                 next: () => {
                     console.log('Porta aberta!');
-                    setBtnConectarLoading(false);
-                    showDetection();
+                    addSerialDataListener()
                 },
                 error: (error) => {
                     setBtnConectarLoading(false)
                     console.log('Não foi possível abrir a porta: ', error) // TODO: Colocar mensagem de erro na tela
                 }
             })
+    }
+
+    const addSerialDataListener = () => {
+        ipcService.sendAndExpectResponse(SERIAL_ROUTES.POST_SET_DATA_LISTENER, props.selectedPort)
+            .subscribe(
+                {
+                    next: () => {
+                        console.log('Listeners adicionados!')
+                        setBtnConectarLoading(false);
+                        showDetection();
+                    },
+                    error: (error) => {
+                        console.log(error)
+                        setBtnConectarLoading(false)
+                    }
+                }
+            )
     }
 
     const closePort = () => {

@@ -10,8 +10,9 @@ export class SerialController {
     constructor(private serialService: SerialService) {
     }
 
-    public setupSerialListeners(window: BrowserWindow): void {
-        this.serialService.setupListeners(window, { pid: 'EA60' });
+    public async setupSerialListeners(window: BrowserWindow, event: IpcMainEvent, path: string): Promise<void> {
+        let err = await this.serialService.setupListeners(window, { pid: 'EA60', path: path });
+        event.sender.send(SERIAL_ROUTES.POST_SET_DATA_LISTENER, err)
     }
 
     public async getPorts(event: IpcMainEvent) {

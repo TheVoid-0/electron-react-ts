@@ -55,32 +55,46 @@ export class SerialService {
     }
 
     // TODO: Alterar protocolo de comunicação se necessário e adicionar lógica para contar o número de presenças
-    public setupListeners(window: BrowserWindow, port: { pid?: string, path?: string }) {
+    public async setupListeners(window: BrowserWindow, port: { pid?: string, path?: string }): Promise<any> {
 
         if (!port.path && !port.pid) {
-            window.webContents.send('Envie o PID ou PATH da porta');
-            return;
-        }
-
-        if (port.pid) {
-            this.serialProvider.findPortByPID(port.pid).then(portInfo => {
-                if (portInfo) {
-                    this.serialProvider.open(portInfo.path).then(this.readData.bind(this, window))
-                        .catch((error) => {
-                            window.webContents.send('Não foi possível abrir a porta: ', { port: port, error: error });
-                        })
-                } else {
-                    window.webContents.send('Não foi encontrada a porta: ', port);
-                }
-            })
+            return { error: true, message: 'Envie o PID ou PATH da porta' };
         }
 
         if (port.path) {
-            this.serialProvider.open(port.path).then(this.readData.bind(this, window))
-                .catch((error) => {
-                    window.webContents.send('Não foi possível abrir a porta: ', { port: port, error: error });
-                });
+            let err;
+            let portOpened = await this.open(port.path).catch((error) => {
+                err = error;
+            });
+
+            if (err) {
+                return { error: err, message: 'Não foi possível abrir a porta' };
+            }
+
+            this.readData(window, portOpened as SerialPort);
+            return { error: false, message: 'Listeners adicionados com sucesso!' }
         }
+
+        if (port.pid) {
+            let portInfo = await this.serialProvider.findPortByPID(port.pid);
+            if (portInfo) {
+                let err;
+                let port = await this.open(portInfo.path).catch((error) => {
+                    err = error;
+                });
+
+                if (err) {
+                    return { error: err, message: 'Não foi possível abrir a porta' };
+                }
+
+                this.readData(window, port as SerialPort);
+            } else {
+                return { error: true, message: 'Não foi possível encontrar a porta: ' + port.pid };
+            }
+        }
+
+        return { error: false, message: 'Listeners adicionados com sucesso!' }
+
     }
 
     private readData(window: BrowserWindow, port: SerialPort) {
