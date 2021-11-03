@@ -11,7 +11,7 @@ export class SerialController {
     }
 
     public setupSerialListeners(window: BrowserWindow): void {
-        this.serialService.setupListeners(window);
+        this.serialService.setupListeners(window, { pid: 'EA60' });
     }
 
     public async getPorts(event: IpcMainEvent) {

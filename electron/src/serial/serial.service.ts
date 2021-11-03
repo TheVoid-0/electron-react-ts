@@ -3,10 +3,10 @@ import { Observable } from 'rxjs'
 import { usbNgElectronApp } from '../app';
 import { SerialProvider } from '../../common/services/serial.provider'
 import { Service } from 'typedi';
+import SerialPort from 'serialport';
 
 // TODO: Criar as classes com as dependências no construtor e exportar elas instanciando as dependências necessárias
 // TODO: Deixar as funções do service como async
-const DEVICE_PID = 'EA60'
 @Service()
 export class SerialService {
 
@@ -54,28 +54,52 @@ export class SerialService {
         }
     }
 
-    public setupListeners(window: BrowserWindow) {
-        this.serialProvider.findPortByPID(DEVICE_PID).then(portInfo => {
-            if (portInfo) {
-                this.serialProvider.open(portInfo.path).then(port => {
-                    let parser = this.serialProvider.setReadLineParser(port);
-                    parser.on('data', (data: string) => {
-                        console.log('dados recebidos: ', data);
-                        switch (data[0]) {
-                            case 'a': // resposta a um envio prévio
-                                this.readAnswer(data.slice(1), window);
-                                break;
-                            case 'i': // informação enviada sem uma requisição
-                                this.readInfo(data.slice(1), window);
-                                break;
-                            default:
-                                break;
-                        }
-                    })
-                    console.log('Listener serial setado');
-                })
+    // TODO: Alterar protocolo de comunicação se necessário e adicionar lógica para contar o número de presenças
+    public setupListeners(window: BrowserWindow, port: { pid?: string, path?: string }) {
+
+        if (!port.path && !port.pid) {
+            window.webContents.send('Envie o PID ou PATH da porta');
+            return;
+        }
+
+        if (port.pid) {
+            this.serialProvider.findPortByPID(port.pid).then(portInfo => {
+                if (portInfo) {
+                    this.serialProvider.open(portInfo.path).then(this.readData.bind(this, window))
+                        .catch((error) => {
+                            window.webContents.send('Não foi possível abrir a porta: ', { port: port, error: error });
+                        })
+                } else {
+                    window.webContents.send('Não foi encontrada a porta: ', port);
+                }
+            })
+        }
+
+        if (port.path) {
+            this.serialProvider.open(port.path).then(this.readData.bind(this, window))
+                .catch((error) => {
+                    window.webContents.send('Não foi possível abrir a porta: ', { port: port, error: error });
+                });
+        }
+    }
+
+    private readData(window: BrowserWindow, port: SerialPort) {
+        let parser = this.serialProvider.setReadLineParser(port);
+        parser.on('data', (data: string) => {
+            console.log('dados recebidos: ', data);
+            switch (data[0]) {
+                case 'a': // resposta a um envio prévio
+                    this.readAnswer(data.slice(1), window);
+                    break;
+                case 'i': // informação enviada sem uma requisição
+                    this.readInfo(data.slice(1), window);
+                    break;
+                default:
+                    break;
             }
         })
+        console.log('Listener serial setado');
+
     }
 
     public async findPorts() {

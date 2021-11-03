@@ -31,9 +31,6 @@ export class Serial {
         console.log('Container getting serialController');
         const serialController = Container.get(SerialController);
 
-        // Listeners do serial
-        serialController.setupSerialListeners(usbNgElectronApp.getMainWindow());
-
         // Rotas do controller interno que será adicionado após a entrada na página
         this._ipcMainService.on(this.channel, SERIAL_ROUTES.GET_PORTS, serialController.getPorts.bind(serialController));
 
@@ -45,6 +42,7 @@ export class Serial {
 
         this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_LED_STATUS, serialController.postLedStatus.bind(serialController));
 
+        this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_SET_DATA_LISTENER, serialController.setupSerialListeners.bind(serialController, usbNgElectronApp.getMainWindow()));
         // Avisa que o módulo preparou as rotas para as funcionalidades
         initialEvent.sender.send(this.channel);
 
