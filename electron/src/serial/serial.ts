@@ -35,13 +35,13 @@ export class Serial {
         serialController.setupSerialListeners(usbNgElectronApp.getMainWindow());
 
         // Rotas do controller interno que será adicionado após a entrada na página
-        this._ipcMainService.on(this.channel, SERIAL_ROUTES.GET_PORTS, serialController.getPorts);
+        this._ipcMainService.on(this.channel, SERIAL_ROUTES.GET_PORTS, serialController.getPorts.bind(serialController));
 
-        this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_AUTOREAD, serialController.postAutoread);
+        this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_AUTOREAD, serialController.postAutoread.bind(serialController));
 
-        this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_OPEN_PORT, serialController.openPort);
+        this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_OPEN_PORT, serialController.openPort.bind(serialController));
 
-        this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_LED_STATUS, serialController.postLedStatus);
+        this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_LED_STATUS, serialController.postLedStatus.bind(serialController));
 
         // Avisa que o módulo preparou as rotas para as funcionalidades
         initialEvent.sender.send(this.channel);
