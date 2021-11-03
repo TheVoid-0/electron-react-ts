@@ -1,10 +1,12 @@
 import SerialPort = require('serialport');
 import { AsyncSubject, Observable, Subscription } from 'rxjs'
+import { Service } from 'typedi';
 
 // type SerialPort = typeof import('serialport')
 interface SerialDataSubscriptions {
     [key: string]: { subscription: Subscription, data: any }
 }
+@Service()
 export class SerialProvider {
 
     private serialPort: typeof SerialPort
@@ -134,5 +136,3 @@ export class SerialProvider {
         return this.portReadyASubject.asObservable();
     }
 }
-
-export const serialProvider = new SerialProvider();

@@ -1,6 +1,6 @@
 import { usbNgElectronApp } from "../app";
 import { SerialService } from "./serial.service";
-import { Service } from 'typedi';
+import Container, { Service } from 'typedi';
 import { IpcMainService } from "../../common/services/ipc-main.service";
 import { IpcMainEvent } from "electron";
 import { SERIAL_ROUTES } from "../../../src/@common/routes/serial-routes";
@@ -27,7 +27,7 @@ export class Serial {
 
         // import SerialService
         // O SerialService não é importado na inicialização como dependência do módulo pois ele possui o SerialProvider como dependência que importa a biblioteca SerialPort. Utilizando o LazyLoad do service evitamos de importar um módulo na aplicação que não será utilizado (mesmo que nessa aplicação ele sempre seja)
-        const serialService: SerialService = (await import('./serial.service')).serialService;
+        const serialService: SerialService = Container.get((await import('./serial.service')).SerialService);
 
         const serialController = new SerialController(serialService);
 

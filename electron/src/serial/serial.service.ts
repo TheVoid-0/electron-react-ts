@@ -1,14 +1,16 @@
 import { BrowserWindow } from 'electron';
 import { Observable } from 'rxjs'
 import { usbNgElectronApp } from '../app';
-import { serialProvider } from '../../common/services/serial.provider'
+import { SerialProvider } from '../../common/services/serial.provider'
+import { Service } from 'typedi';
 
 // TODO: Criar as classes com as dependências no construtor e exportar elas instanciando as dependências necessárias
 // TODO: Deixar as funções do service como async
 const DEVICE_PID = 'EA60'
+@Service()
 export class SerialService {
 
-    constructor() { }
+    constructor(private serialProvider: SerialProvider) { }
 
     private readInfo(data: string, window: BrowserWindow) {
         switch (data[0]) {
@@ -51,10 +53,10 @@ export class SerialService {
     }
 
     public setupListeners(window: BrowserWindow) {
-        serialProvider.findPortByPID(DEVICE_PID).then(portInfo => {
+        this.serialProvider.findPortByPID(DEVICE_PID).then(portInfo => {
             if (portInfo) {
-                serialProvider.open(portInfo.path).then(port => {
-                    let parser = serialProvider.setReadLineParser(port);
+                this.serialProvider.open(portInfo.path).then(port => {
+                    let parser = this.serialProvider.setReadLineParser(port);
                     parser.on('data', (data: string) => {
                         console.log('dados recebidos: ', data);
                         switch (data[0]) {
@@ -75,15 +77,15 @@ export class SerialService {
     }
 
     public async findPorts() {
-        return await serialProvider.findPorts();
+        return await this.serialProvider.findPorts();
     }
 
     public sendData(data: string) {
-        return serialProvider.sendData(data);
+        return this.serialProvider.sendData(data);
     }
 
     public sendCommand(data: string): Observable<void> {
-        return serialProvider.sendData(`c${data}\n`);
+        return this.serialProvider.sendData(`c${data}\n`);
     }
 
     // TODO: Verificar o cleanup da serial port
@@ -91,12 +93,10 @@ export class SerialService {
         usbNgElectronApp.onTerminate(this.cleanup);
         console.log('args open-port', path);
 
-        return await serialProvider.open(path);
+        return await this.serialProvider.open(path);
     }
 
     private cleanup() {
-        serialProvider.closePort();
+        this.serialProvider.closePort();
     }
 }
-
-export const serialService = new SerialService();
