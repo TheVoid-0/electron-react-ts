@@ -1,6 +1,9 @@
 import { BrowserWindow } from 'electron';
+import { firstValueFrom } from 'rxjs'
 import { usbNgElectronApp } from '../app';
 import { serialProvider } from '../../common/services/serial.provider'
+import { SERIAL_ROUTES } from './serial-routes';
+import { IpcMainEvent } from 'electron/main';
 
 // TODO: Criar as classes com as dependências no construtor e exportar elas instanciando as dependências necessárias
 // TODO: Deixar as funções do service como async
@@ -73,22 +76,36 @@ export class SerialService {
         })
     }
 
-    public findPorts() {
-        return serialProvider.findPorts();
+    public async findPorts(event: IpcMainEvent) {
+        console.log('buscando portas...');
+
+        let ports = await serialProvider.findPorts();
+        event.sender.send(SERIAL_ROUTES.GET_PORTS.res, { ports: ports });
     }
 
     public sendData(data: string) {
         return serialProvider.sendData(data);
     }
 
-    public sendCommand(data: string) {
-        return serialProvider.sendData(`c${data}\n`);
+    public async sendCommand(event: IpcMainEvent, data: string) {
+        firstValueFrom(serialProvider.sendData(`c${data}\n`)).then(() => {
+            event.sender.send(SERIAL_ROUTES.POST_AUTOREAD.res, { message: 'success' });
+        }).catch((error) => {
+            event.sender.send(SERIAL_ROUTES.POST_AUTOREAD.res, { error: error, message: 'error' });
+        })
     }
 
     // TODO: Verificar o cleanup da serial port
-    public open(path: string) {
+    public async open(event: IpcMainEvent, path: string) {
         usbNgElectronApp.onTerminate(this.cleanup);
-        return serialProvider.open(path);
+        console.log('args open-port', path);
+
+        let port = await serialProvider.open(path).catch((error) => {
+            console.log(error);
+            event.sender.send(SERIAL_ROUTES.POST_OPEN_PORT.res, { error: error, message: 'error' });
+        });
+
+        event.sender.send(SERIAL_ROUTES.POST_OPEN_PORT.res, { message: 'success' });
     }
 
     private cleanup() {

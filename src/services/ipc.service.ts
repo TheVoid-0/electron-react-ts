@@ -51,9 +51,9 @@ class IpcService {
             subscriber.complete();
         }, 3000);
 
-        let unsub = this._ipc.on(`${channel}-ready`, (event, args) => {
+        let unsub = this._ipc.on(`${channel}-ready`, (args) => {
             clearTimeout(timeout);
-
+            console.log(`${channel}-ready`, args);
             if (args?.error) {
                 subscriber.error(args.message)
             } else {

@@ -3,12 +3,13 @@ import { SerialService } from "./serial.service";
 import { Service } from 'typedi';
 import { IpcMainService } from "../../common/services/ipc-main.service";
 import { IpcMainEvent } from "electron";
+import { SERIAL_ROUTES } from "./serial-routes";
 
 // TODO: Criar um DTO para padronizar a entrada de dados em todos os endpoints e criar mensagens de erro ao receber parametros inexperados
 // TODO: Ajustar as depreciações do toPromise do Observable
 @Service()
 export class Serial {
-    private channel: string = 'serial-module';
+    private channel: string = SERIAL_ROUTES.MODULE.root;
     constructor(private _ipcMainService: IpcMainService) {
         console.log('serial constructor', this._ipcMainService)
 
@@ -19,7 +20,7 @@ export class Serial {
     private async setupRoutes(initialEvent: IpcMainEvent) {
         console.log('Criando rotas do modulo');
 
-        this._ipcMainService.on(this.channel, `${this.channel}-closed`, () => {
+        this._ipcMainService.on(this.channel, SERIAL_ROUTES.MODULE.destroy, () => {
             this._ipcMainService.removeAllFromPage(this.channel);
         });
 
@@ -31,45 +32,16 @@ export class Serial {
         serialService.setupListeners(usbNgElectronApp.getMainWindow());
 
         // Rotas do controller interno que será adicionado após a entrada na página
-        this._ipcMainService.on(this.channel, 'serial-module-get-ports', (event) => {
-            console.log('buscando portas...');
+        this._ipcMainService.on(this.channel, SERIAL_ROUTES.GET_PORTS.req, serialService.findPorts);
 
-            serialService.findPorts().then((ports) => {
-                event.sender.send('serial-module-get-ports-ready', { ports: ports });
-            })
-        });
+        this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_AUTOREAD.req, serialService.sendCommand);
 
-        this._ipcMainService.on(this.channel, 'serial-module-post-autoread', (event, args) => {
+        this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_OPEN_PORT.req, serialService.open);
 
-            serialService.sendCommand(args).toPromise().then(() => {
-                event.sender.send('serial-module-post-autoread-ready', { message: 'success' });
-            }).catch((error) => {
-                event.sender.send('serial-module-post-autoread-ready', { error: error, message: 'error' });
-            });
-        });
+        this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_LED_STATUS.req, serialService.sendCommand);
 
-        this._ipcMainService.on(this.channel, 'serial-module-post-open-port', (event, args: { path: string }) => {
-            console.log('args open-port', args);
-            serialService.open(args.path).then((port) => {
-                event.sender.send('serial-module-post-open-port-ready', { message: 'success' });
-            }).catch(error => {
-                console.log(error);
-                event.sender.send('serial-module-post-open-port-ready', { error: error, message: 'error' });
-            });
-        });
-
-        this._ipcMainService.on(this.channel, 'serial-module-post-led-status', (event, args) => {
-            console.log('enviando na porta serial', args);
-            serialService.sendCommand(args).toPromise().then(() => {
-                console.log('sucesso');
-                event.sender.send('serial-module-post-led-status-ready', { message: 'success' });
-            }).catch(error => {
-                console.log(error);
-                event.sender.send('serial-module-post-led-status-ready', { error: error, message: 'error' });
-            })
-        })
-
-        initialEvent.sender.send(`${this.channel}-ready`);
+        // Avisa que o módulo preparou as rotas para as funcionalidades
+        initialEvent.sender.send(SERIAL_ROUTES.MODULE.res);
 
     }
 
