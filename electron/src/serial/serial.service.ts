@@ -1,5 +1,5 @@
 import { BrowserWindow } from 'electron';
-import { firstValueFrom } from 'rxjs'
+import { Observable } from 'rxjs'
 import { usbNgElectronApp } from '../app';
 import { serialProvider } from '../../common/services/serial.provider'
 import { SERIAL_ROUTES } from './serial-routes';
@@ -76,36 +76,24 @@ export class SerialService {
         })
     }
 
-    public async findPorts(event: IpcMainEvent) {
-        console.log('buscando portas...');
-
-        let ports = await serialProvider.findPorts();
-        event.sender.send(SERIAL_ROUTES.GET_PORTS, { ports: ports });
+    public async findPorts() {
+        return await serialProvider.findPorts();
     }
 
     public sendData(data: string) {
         return serialProvider.sendData(data);
     }
 
-    public async sendCommand(event: IpcMainEvent, data: string) {
-        firstValueFrom(serialProvider.sendData(`c${data}\n`)).then(() => {
-            event.sender.send(SERIAL_ROUTES.POST_AUTOREAD, { message: 'success' });
-        }).catch((error) => {
-            event.sender.send(SERIAL_ROUTES.POST_AUTOREAD, { error: error, message: 'error' });
-        })
+    public sendCommand(data: string): Observable<void> {
+        return serialProvider.sendData(`c${data}\n`);
     }
 
     // TODO: Verificar o cleanup da serial port
-    public async open(event: IpcMainEvent, path: string) {
+    public async open(path: string) {
         usbNgElectronApp.onTerminate(this.cleanup);
         console.log('args open-port', path);
 
-        let port = await serialProvider.open(path).catch((error) => {
-            console.log(error);
-            event.sender.send(SERIAL_ROUTES.POST_OPEN_PORT, { error: error, message: 'error' });
-        });
-
-        event.sender.send(SERIAL_ROUTES.POST_OPEN_PORT, { message: 'success' });
+        return await serialProvider.open(path);
     }
 
     private cleanup() {
