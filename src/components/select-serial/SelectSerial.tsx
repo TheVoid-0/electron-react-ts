@@ -1,8 +1,14 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { FC, useEffect, useRef, useState } from "react";
 import ipcService from "../../services/ipc.service";
 import './SelectSerial.css';
 
-function SelectPresence() {
+interface ISelectSerial {
+    isVisibleSelectSerial: boolean,
+    setVisibleSelectSerial: (isVibleSelectSerial: boolean) => void,
+    setVisibleDetectPresence: (isVisibleDetectPresence: boolean) => void
+}
+
+const SelectSerial: FC<ISelectSerial> = (props) => {
     const [isIpcAvailable, setIpcAvailable] = useState(false);
     const isIpcAvailableRef = useRef(isIpcAvailable);
 
@@ -34,22 +40,30 @@ function SelectPresence() {
         )
     }
 
+    const showDetection = () => {
+        props.setVisibleSelectSerial(false);
+        props.setVisibleDetectPresence(true);
+    }
+
     return (
-        <div>
-            {isIpcAvailable ?
-                <div>
-                    <p>Selecione uma porta serial para estabelecer a conexão</p>
-                    <div className="conectar-section">
-                        <button className="btn">
-                            Conectar
-                        </button>
+        <div className={props.isVisibleSelectSerial ? 'show selection-content' : 'hide'}>
+            <div className="card">
+                {isIpcAvailable ?
+                    <div>
+                        <p>Selecione uma porta serial para estabelecer a conexão</p>
+                        {/* todo: adicionar o select para escolher a porta que vai ser usada */}
+                        <div className="conectar-section">
+                            <button className="btn" onClick={showDetection}>
+                                Conectar
+                            </button>
+                        </div>
                     </div>
-                </div>
-                :
-                <div>O módulo de comunicação com o desktop não está disponível! </div>
-            }            
+                    :
+                    <div>O módulo de comunicação com o desktop não está disponível! </div>
+                }
+            </div>
         </div>
     );
 }
 
-export default SelectPresence
+export default SelectSerial

@@ -21,9 +21,6 @@ body {
   background: rgb(99, 99, 99);
 }body {
   background-color: #f8f8f8;
-  height: 100vh;
-  width: 100vw;
-  display: flex;
   align-items: center;
   justify-content: center;
 }
@@ -36,11 +33,14 @@ body {
   border-radius: 5px;
 }
 
-.card-footer {
+.footer {
+  bottom: 30px;
+  width: 100%;
+  position: fixed;
   text-align: center;
 }
 
-.card-footer small {
+.footer small {
   display: block;
   color: #808080;
 }
@@ -55,6 +55,8 @@ hr {
 h3 {
   color: #008db7;
   text-align: center;
+  margin-top: 50px;
+  margin-bottom: 30px;
 }
 
 .btn {
@@ -64,4 +66,54 @@ h3 {
   padding: 10px;
   border: none;
   border-radius: 3px;
+  cursor: pointer;
+  transition: all .4s;
+}
+
+.btn:hover {
+  background-color: #016787;
+}
+
+.footer hr {
+  margin-bottom: 30px;
+}
+
+.show {
+  animation-name: fade-in;
+  animation-duration: 2s;
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+  opacity: 0;
+  left: -500px;
+}
+
+.hide {
+  animation-name: fade-out;
+  animation-duration: 2s;
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+  opacity: 1;
+  left: 0;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    left: -500px;
+  }
+  to {
+    opacity: 1;
+    left: 0;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+    left: 0;
+  }
+  to {
+    opacity: 0;
+    left: 500px;
+  }
 }
