@@ -1,6 +1,6 @@
 import { firstValueFrom } from 'rxjs'
 import { IpcMainEvent } from "electron";
-import { SERIAL_ROUTES } from "./serial-routes";
+import { SERIAL_ROUTES } from "../../../src/@common/routes/serial-routes";
 import { serialService, SerialService } from "./serial.service";
 
 

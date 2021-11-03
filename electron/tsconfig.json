@@ -39,7 +39,7 @@
   },
   "include": [
     "./"
-  ],
+, "../src/@common/routes/"  ],
   "exclude": [
     "../node_modules",
     "../src" // <- necessário para não recompilar o react

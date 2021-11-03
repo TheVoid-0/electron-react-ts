@@ -2,8 +2,6 @@ import { BrowserWindow } from 'electron';
 import { Observable } from 'rxjs'
 import { usbNgElectronApp } from '../app';
 import { serialProvider } from '../../common/services/serial.provider'
-import { SERIAL_ROUTES } from './serial-routes';
-import { IpcMainEvent } from 'electron/main';
 
 // TODO: Criar as classes com as dependências no construtor e exportar elas instanciando as dependências necessárias
 // TODO: Deixar as funções do service como async
