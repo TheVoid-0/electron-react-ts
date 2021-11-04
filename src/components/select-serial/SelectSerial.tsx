@@ -1,4 +1,4 @@
-import React, { Dispatch, FC, MouseEvent, SetStateAction, useEffect, useRef, useState } from "react";
+import React, { Dispatch, FC, SetStateAction, useEffect, useState } from "react";
 import { SERIAL_ROUTES } from "../../@common/routes/serial-routes";
 import ipcService from "../../services/ipc.service";
 import './SelectSerial.css';

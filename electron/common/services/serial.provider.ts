@@ -20,9 +20,17 @@ export class SerialProvider {
         this.serialPort = SerialPort;
     }
 
-    public async findPortByPID(pid: string): Promise<SerialPort.PortInfo | undefined> {
+    public async findPort(findOptions: { pid?: string, path?: string }): Promise<SerialPort.PortInfo | undefined> {
+        if (!findOptions.path && !findOptions.pid) {
+            return undefined;
+        }
         let ports = await this.serialPort.list();
-        return ports.find((port) => port.productId === pid);
+
+        if (findOptions.path) {
+            return ports.find((port) => port.path === findOptions.path);
+        }
+
+        return ports.find((port) => port.productId === findOptions.pid);
 
     }
     public async findPorts() {
