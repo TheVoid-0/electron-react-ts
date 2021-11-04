@@ -39,7 +39,7 @@ export class SerialService {
             case 'p': // detector de presença
                 // TODO: adicionar o pid no nome do arquivo
                 window.webContents.send('presence_detected', data)
-                this.fileService.writeFile(`log_teste.txt`, Buffer.from(''));
+                // this.fileService.writeFile(`log_teste.txt`, Buffer.from(''));
                 break;
             default:
                 break;

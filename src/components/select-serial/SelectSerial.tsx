@@ -70,7 +70,10 @@ const SelectSerial: FC<ISelectSerial> = (props) => {
     }
 
     const addSerialDataListener = () => {
-        ipcService.sendAndExpectResponse(SERIAL_ROUTES.POST_SET_DATA_LISTENER, props.selectedPort)
+        ipcService.on(SERIAL_ROUTES.MODULE.init, 'presence_detected' , (data) => {
+            console.log('RECEBI DO SERIAL', data);
+        })
+        ipcService.sendAndExpectResponse(SERIAL_ROUTES.POST_SET_DATA_LISTENER, undefined, { path: props.selectedPort })
             .subscribe(
                 {
                     next: () => {
@@ -117,7 +120,7 @@ const SelectSerial: FC<ISelectSerial> = (props) => {
                             <small>Portas disponíveis:</small>
                             <select value={props.selectedPort} onChange={(event) => { props.setSelectedPort(event.target.value) }}>
                                 <option value="0" selected>{comPorts.length > 0 ? 'Selecione uma porta...' : 'Nenhuma porta disponível!'}</option>
-                                {comPorts.map((port: any) => (<option>{port.path}</option>))}
+                                {comPorts.map((port: any) => (<option value={port.path}>{`${port.path} ${port.productId}`}</option>))}
                             </select>
                         </div>
 
