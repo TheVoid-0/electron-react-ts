@@ -10,7 +10,7 @@ interface SerialDataSubscriptions {
 export class SerialProvider {
 
     private serialPort: typeof SerialPort
-    private portOpened: SerialPort | undefined;
+    private portsOpened: { [path: string]: { port: SerialPort, portInfo: SerialPort.PortInfo } } = {};
     private portReadyASubject: AsyncSubject<SerialPort> = new AsyncSubject<SerialPort>();
     /**
      * Dados que estão pendentes para envio na porta serial
@@ -33,26 +33,31 @@ export class SerialProvider {
         return ports.find((port) => port.productId === findOptions.pid);
 
     }
+
     public async findPorts() {
         return await this.serialPort.list();
     }
 
-    // TODO: Adicionar handling de duas ou mais portas abertas
     public async open(path: string, options?: SerialPort.OpenOptions): Promise<SerialPort> {
-        if (this.portOpened != undefined && this.portOpened.path === path) {
-            console.log('porta já esta aberta', this.portOpened.path);
-            return Promise.resolve(this.portOpened);
+        // Se a porta requisita já esta aberta retorna ela
+        if (this.portsOpened[path] && this.portsOpened[path].port.path === path) {
+            console.log('porta já esta aberta', this.portsOpened[path].port.path);
+            return Promise.resolve(this.portsOpened[path].port);
         }
+
         return new Promise<SerialPort>((resolve, reject) => {
-            const port: SerialPort = new SerialPort(path, options ? options : { baudRate: 19200 }, (error) => {
+            const port: SerialPort = new SerialPort(path, options ? options : { baudRate: 19200 }, async (error) => {
                 if (error) {
                     console.log('Failed to open port: ' + error);
                     reject(error);
                 } else {
                     console.log('Porta aberta');
-                    this.portOpened = port;
-                    this.portReadyASubject.next(this.portOpened);
-                    resolve(this.portOpened);
+
+                    // Passando tipo fixo no retorno do findPort pois nesse caso, como a porta já foi aberta, é impossível ele não encontrar a porta
+                    this.portsOpened[path] = { port: port, portInfo: await this.findPort({ path: path }) as SerialPort.PortInfo };
+
+                    this.portReadyASubject.next(this.portsOpened[path].port);
+                    resolve(this.portsOpened[path].port);
                 }
             });
         });
@@ -72,14 +77,16 @@ export class SerialProvider {
      * Se uma porta já estiver aberta no momento que essa função for chamada, o dado será escrito imediatamente.
      * É importante notar que se uma porta nunca for aberta, a função ficará aguardando para escrever o dado por tempo
      * indeterminado, para cancelar a pendência, use a função: {@link cancelDataSend}.
+     * 
+     * @param portPath O caminho da porta na qual o dado deve ser escrito. Esta será a porta que será aguardada para o observable ser completado.
      * @param data Dados para serem escritos na porta serial
      * @param dataKey Chave para identificar o dado que está sendo enviado, será usada para cancelar o envio se estiver pendente
      * ou saber se o envio já foi realizado em um momento futuro, se nenhuma chave for dada as informações não serão guardadas.
      * @returns Um Observable que completa após a tentativa de escrever na porta serial
      */
-    public sendData(data: string, dataKey?: string): Observable<void> {
+    public sendData(portPath: string, data: string, dataKey?: string): Observable<void> {
         return new Observable<void>(subscriber => {
-            let sub = this.isPortReady().subscribe(port => {
+            let sub = this.onPortReady(portPath).subscribe(port => {
 
                 // port.setEncoding('utf-8');
                 console.log('escrevendo na serial...');
@@ -110,20 +117,43 @@ export class SerialProvider {
 
     }
 
-    public closePort() {
+    /**
+     * Fecha todas as portas abertas ou somente a do caminho especificado.
+     * 
+     * @param path 
+     */
+    public closePort(path?: string) {
         return new Promise<void>((resolve, reject) => {
-            this.portOpened?.close((error) => {
-                if (error) reject(error);
-                this.portOpened = undefined;
-                resolve();
-            });
+
+            // Fecha a porta no caminho especificado
+            if (path) {
+                if (!this.portsOpened[path]) {
+                    reject('Porta não consta como aberta: ' + path);
+                }
+                this.portsOpened[path].port.close((error) => {
+                    if (error) reject(error);
+                    delete this.portsOpened[path];
+                    resolve()
+                });
+            }
+
+            // Se nenhum caminho foi especificado, fecha todas que encontrar
+            for (const key in this.portsOpened) {
+                if (this.portsOpened[key]) {
+                    this.portsOpened[key].port.close((error) => {
+                        if (error) reject(error);
+                        delete this.portsOpened[key];
+                    });
+                }
+            }
+            resolve();
         })
     }
 
     /**
      * Cancela todos os envios pendentes na porta serial ou somente o especificado.
      * 
-     * Para verificar se um dado específico já foi enviado ou não use: {@link isDataPending}
+     * Para verificar se um dado específico está pendente ou não use: {@link isDataPending}
      * @param dataKey chave do dado que será cancelado o envio
      */
     public cancelDataSend(dataKey?: string) {
@@ -139,15 +169,38 @@ export class SerialProvider {
     }
 
     /**
+     * OBS: false não significa que o dado foi enviado com sucesso, mas somente que o dado não está mais pendente.
      * 
      * @param dataKey chave do dado que será verificado a pendência
-     * @returns false se o dado já foi enviado, true caso contrário
+     * @returns true se o dado está pendente, false caso contrário
      */
     public isDataPending(dataKey: string) {
         return !!this.serialDataWaiting[dataKey];
     }
 
-    public isPortReady(): Observable<SerialPort> {
-        return this.portReadyASubject.asObservable();
+    /**
+     * Retorna a porta do caminho especificado assim que ela estiver pronta. Ficará aguardando por tempo indeterminado a porta solicitada
+     * 
+     * @param path caminho da porta que deseja esperar
+     */
+    public onPortReady(path: string): Observable<SerialPort> {
+        return new Observable<SerialPort>((subscriber) => {
+
+            if (this.portsOpened[path]) {
+                subscriber.next(this.portsOpened[path].port);
+                subscriber.complete();
+            }
+
+            this.portReadyASubject.subscribe(
+                {
+                    next: (port) => {
+                        if (port.path === path) {
+                            subscriber.next(port);
+                            subscriber.complete();
+                        }
+                    },
+                    error: (error) => { subscriber.error(error); subscriber.complete(); }
+                });
+        });
     }
 }

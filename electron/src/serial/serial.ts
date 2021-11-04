@@ -6,7 +6,6 @@ import { IpcMainEvent } from "electron";
 import { SERIAL_ROUTES } from "../../../src/@common/routes/serial-routes";
 import { SerialController } from "./serial.controller";
 
-// TODO: Criar um DTO para padronizar a entrada de dados em todos os endpoints e criar mensagens de erro ao receber parametros inexperados
 @Service()
 export class Serial {
     private channel: string = SERIAL_ROUTES.MODULE.init;

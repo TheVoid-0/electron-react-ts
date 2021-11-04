@@ -137,12 +137,12 @@ export class SerialService {
         return await this.serialProvider.findPorts();
     }
 
-    public sendData(data: string) {
-        return this.serialProvider.sendData(data);
+    public sendData(portPath: string, data: string) {
+        return this.serialProvider.sendData(portPath, data);
     }
 
-    public sendCommand(data: string): Observable<void> {
-        return this.serialProvider.sendData(`c${data}\n`);
+    public sendCommand(data: string, portPath: string): Observable<void> {
+        return this.serialProvider.sendData(`c${data}\n`, portPath);
     }
 
     // TODO: Verificar o cleanup da serial port

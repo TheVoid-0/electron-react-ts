@@ -5,6 +5,7 @@ import { SerialService } from "./serial.service";
 import { Service } from 'typedi';
 
 
+// TODO: Criar um DTO para padronizar a entrada de dados em todos os endpoints e criar mensagens de erro ao receber parametros inexperados
 @Service()
 export class SerialController {
     constructor(private serialService: SerialService) {
@@ -20,8 +21,8 @@ export class SerialController {
         event.sender.send(SERIAL_ROUTES.GET_PORTS, { ports: await this.serialService.findPorts() });
     }
 
-    public async postAutoread(event: IpcMainEvent, data: string) {
-        firstValueFrom(this.serialService.sendCommand(data)).then(() => {
+    public async postAutoread(event: IpcMainEvent, portPath: string, data: string) {
+        firstValueFrom(this.serialService.sendCommand(data, portPath)).then(() => {
             event.sender.send(SERIAL_ROUTES.POST_AUTOREAD, { message: 'success' });
         }).catch((error: any) => {
             console.log('error', error)
@@ -49,8 +50,8 @@ export class SerialController {
                 event.sender.send(SERIAL_ROUTES.POST_CLOSE_PORT, { error: error, message: 'error' }));
     }
 
-    public async postLedStatus(event: IpcMainEvent, data: string) {
-        firstValueFrom(this.serialService.sendCommand(data)).then(() => {
+    public async postLedStatus(event: IpcMainEvent, portPath: string, data: string) {
+        firstValueFrom(this.serialService.sendCommand(portPath, data)).then(() => {
             event.sender.send(SERIAL_ROUTES.POST_AUTOREAD, { message: 'success' });
         }).catch((error: any) => {
             console.log('error', error)
