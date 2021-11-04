@@ -13,6 +13,7 @@ interface ISelectSerial {
 
 const SelectSerial: FC<ISelectSerial> = (props) => {
     const [isIpcAvailable, setIpcAvailable] = useState(false);
+    const [isLoadingPorts, setLoadingPorts] = useState(false);
 
     const [comPorts, setComPorts] = useState([]);
 
@@ -43,13 +44,18 @@ const SelectSerial: FC<ISelectSerial> = (props) => {
     }, []);
 
     const getPorts = () => {
+        setLoadingPorts(true);
         ipcService.sendAndExpectResponse(SERIAL_ROUTES.GET_PORTS).subscribe(
             {
                 next: ({ body }) => {
                     console.log('ports: ', body);
                     setComPorts(body.ports);
+                    setLoadingPorts(false);
                 },
-                error: (err) => console.log(err)
+                error: (err) => {
+                    console.log(err);
+                    setLoadingPorts(true);
+                }
             }
         )
     }
@@ -124,8 +130,10 @@ const SelectSerial: FC<ISelectSerial> = (props) => {
                             </select>
                         </div>
 
+                        <p className="reload-ports" onClick={getPorts}>{isLoadingPorts ? 'Carregando portas...' : 'Recarregar portas'}</p>
+
                         <div className="conectar-section">
-                            <button className="btn" disabled={isBtnConectarLoading} onClick={openPort}>
+                            <button className="btn conectar" disabled={isBtnConectarLoading} onClick={openPort}>
                                 {isBtnConectarLoading ? 'Aguarde...' : 'Conectar'}
                             </button>
                             <button className="btn" disabled={isBtnConectarLoading} onClick={closePort}>
