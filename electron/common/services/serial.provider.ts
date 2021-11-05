@@ -6,11 +6,68 @@ import { Service } from 'typedi';
 interface SerialDataSubscriptions {
     [key: string]: { subscription: Subscription, data: any }
 }
+
+type PortInfo = {
+    port: SerialPort,
+    portInfo: SerialPort.PortInfo
+}
+
+type PortInfoSimpleHashMap = {
+    [path: string]: { port: SerialPort, portInfo: SerialPort.PortInfo }
+}
+
+
+class SimpleHashMap<K extends keyof any, V>  {
+    public data: { [P in K]: V } = {}
+
+    public add(key: K, value: V) {
+        this.data[key] = value;
+    }
+
+    public forEach(callback: (port: PortInfo) => void) {
+        for (const key in this.data) {
+            callback(this.data[key]);
+        }
+    }
+
+    public get(key: string): PortInfo | undefined {
+        return this.data[key];
+    }
+
+    public length(): number {
+        return Object.keys(this.data).length
+    }
+}
+
+type PortsOpenedKeyValues = ((key: string, value: PortInfo) => void) | ((callback: (port: PortInfo) => void) => void) | PortInfoSimpleHashMap;
+class PortsOpened {
+    /**
+     * Onde os dados são guardados utilizando a chave passada para o método {@link add}
+     */
+    public data: PortInfoSimpleHashMap = {}
+
+    public add(key: string, value: PortInfo) {
+        this.data[key] = value;
+    }
+
+    public forEach(callback: (port: PortInfo) => void) {
+        for (const key in this.data) {
+            callback(this.data[key]);
+        }
+    }
+
+    public get(key: string): PortInfo | undefined {
+        return this.data[key];
+    }
+
+}
+
 @Service()
 export class SerialProvider {
 
     private serialPort: typeof SerialPort
-    private portsOpened: { [path: string]: { port: SerialPort, portInfo: SerialPort.PortInfo } } = {};
+    // private portsOpened: { [path: string]: { port: SerialPort, portInfo: SerialPort.PortInfo } } = {};
+    private portsOpened: PortsOpened = new PortsOpened();
     private portReadyASubject: AsyncSubject<SerialPort> = new AsyncSubject<SerialPort>();
     /**
      * Dados que estão pendentes para envio na porta serial
@@ -38,11 +95,22 @@ export class SerialProvider {
         return await this.serialPort.list();
     }
 
+    public getOpenedPort(findOptions: { pid?: string, path?: string }) {
+        if (!findOptions.pid && !findOptions.path) {
+            throw new Error('Informe o pid ou path');
+        }
+
+        if (findOptions.pid) {
+            this.portsOpened.
+        }
+    }
+
     public async open(path: string, options?: SerialPort.OpenOptions): Promise<SerialPort> {
         // Se a porta requisita já esta aberta retorna ela
-        if (this.portsOpened[path] && this.portsOpened[path].port.path === path) {
-            console.log('porta já esta aberta', this.portsOpened[path].port.path);
-            return Promise.resolve(this.portsOpened[path].port);
+        let portOpenedInfo = this.portsOpened.get(path);
+        if (portOpenedInfo && portOpenedInfo.port.path === path) {
+            console.log('porta já esta aberta', portOpenedInfo.port.path);
+            return Promise.resolve(portOpenedInfo.port);
         }
 
         return new Promise<SerialPort>((resolve, reject) => {
