@@ -46,7 +46,7 @@ export class SerialProvider {
         }
 
         return new Promise<SerialPort>((resolve, reject) => {
-            const port: SerialPort = new SerialPort(path, options ? options : { baudRate: 19200 }, async (error) => {
+            const port: SerialPort = new SerialPort(path, options ? options : { baudRate: 115200 }, async (error) => {
                 if (error) {
                     console.log('Failed to open port: ' + error);
                     reject(error);
@@ -84,15 +84,15 @@ export class SerialProvider {
      * ou saber se o envio já foi realizado em um momento futuro, se nenhuma chave for dada as informações não serão guardadas.
      * @returns Um Observable que completa após a tentativa de escrever na porta serial
      */
-    public sendData(portPath: string, data: string, dataKey?: string): Observable<void> {
+    public sendData(data: string, portPath: string, dataKey?: string): Observable<void> {
         return new Observable<void>(subscriber => {
             let sub = this.onPortReady(portPath).subscribe(port => {
 
                 // port.setEncoding('utf-8');
-                console.log('escrevendo na serial...');
+                console.log('escrevendo na serial... ', data);
                 let buffer = Buffer.from(data);
                 console.log('buffer vai escrever: ', buffer);
-                port.write(buffer, (error) => {
+                port.write(data, (error) => {
                     if (error) {
                         console.log(error);
                         subscriber.error(error);
@@ -105,6 +105,7 @@ export class SerialProvider {
                         delete this.serialDataWaiting[dataKey];
                     }
                     subscriber.complete();
+                    console.log('Dados escritos');
                 });
             });
 
@@ -178,6 +179,7 @@ export class SerialProvider {
         return !!this.serialDataWaiting[dataKey];
     }
 
+    // TODO: verificar next do asyncSubject que não está funcionando
     /**
      * Retorna a porta do caminho especificado assim que ela estiver pronta. Ficará aguardando por tempo indeterminado a porta solicitada
      * 
@@ -185,21 +187,24 @@ export class SerialProvider {
      */
     public onPortReady(path: string): Observable<SerialPort> {
         return new Observable<SerialPort>((subscriber) => {
-
+            console.log('onPortReady, portsOpened: ', Object.keys(this.portsOpened), 'porta desejada: ', path);
             if (this.portsOpened[path]) {
                 subscriber.next(this.portsOpened[path].port);
                 subscriber.complete();
+                return;
             }
 
+            console.log('Adicionando subscribe no portReadyASubject');
             this.portReadyASubject.subscribe(
                 {
                     next: (port) => {
+                        console.log('onPortReady subscription, porta aberta: ', port.path)
                         if (port.path === path) {
                             subscriber.next(port);
                             subscriber.complete();
                         }
                     },
-                    error: (error) => { subscriber.error(error); subscriber.complete(); }
+                    error: (error) => { console.log('subscribe:', error); subscriber.error(error); subscriber.complete(); }
                 });
         });
     }

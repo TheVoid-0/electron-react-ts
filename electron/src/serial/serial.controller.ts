@@ -12,8 +12,14 @@ export class SerialController {
     }
 
     public async setupSerialListeners(window: BrowserWindow, event: IpcMainEvent, responseChannel: string, findPortOptions: { path?: string, pid?: string }): Promise<void> {
+        console.log('SetupSerialListeners: ', findPortOptions);
         let err = await this.serialService.setupListeners(window, responseChannel, { pid: 'EA60', path: findPortOptions.path });
-        event.sender.send(SERIAL_ROUTES.POST_SET_DATA_LISTENER, err)
+        event.sender.send(SERIAL_ROUTES.POST_SET_DATA_LISTENER, err);
+    }
+
+    public async postData(event: IpcMainEvent, data: any, portPath: string) {
+        await firstValueFrom(this.serialService.sendCommand(data, portPath));
+        event.sender.send(SERIAL_ROUTES.POST_DATA);
     }
 
     public async getPorts(event: IpcMainEvent) {

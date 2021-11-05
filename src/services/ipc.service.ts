@@ -1,6 +1,6 @@
 import { Observable, Subscriber } from 'rxjs';
 
-import { IpcRenderer, IpcResponse } from '../@common/types/ipc-renderer.types'
+import { IpcRenderer, IpcResponse, IpcUnsubscribe } from '../@common/types/ipc-renderer.types'
 
 class IpcService {
 
@@ -20,17 +20,18 @@ class IpcService {
 
     public static isIpcAvailable(): boolean {
         const ipcApi = ((window as any).ipcApi as IpcRenderer | undefined);
-        if(!ipcApi) {
+        if (!ipcApi) {
             return false;
         }
         return ipcApi.isAvailable();
     }
 
-    public on(page: string, channel: string, listener: (...args: any[]) => void): void {
-        this._ipc.on(channel, listener);
+    public on(page: string, channel: string, listener: (...args: any[]) => void): IpcUnsubscribe {
+        let unsub = this._ipc.on(channel, listener);
 
         // Verifica se já existe um listener dessa página, se sim adiciona esse canal aos listeners dessa página, se não, cria a página com esse canal como listener
         this.listeners[page] ? this.listeners[page].push(channel) : this.listeners = { [page]: [channel] };
+        return unsub;
     }
 
     public send(channel: string, ...args: any[]): void {
@@ -73,7 +74,7 @@ class IpcService {
             this._ipc.removeAllListeners(channel);
         }
         delete this.listeners[page];
-        this._ipc.send(`${page}-closed`);
+        this._ipc.send(page);
     }
 
     /**

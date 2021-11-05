@@ -3,14 +3,16 @@ import 'reflect-metadata'
 import { Container } from 'typedi';
 import { BrowserWindow } from 'electron';
 import { Serial } from './serial/serial';
+import { File } from './files/file';
 
-
+type Modules = { new(...args: any[]): any };
 /**
  * cada AppModule se refere a um modulo lógico do sistema, uma "parte" que contém funcionalidades atrelada a lógica de negócio.
  * Os modulos contidos aqui serão inicializados ao criar a aplicação
  */
-const AppModules = [
+const AppModules: Array<Modules> = [
     Serial,
+    File
 ]
 // TODO: verificar para adicionar a possibilidade de cada modulo poder rodar em uma "thread"
 export class App {

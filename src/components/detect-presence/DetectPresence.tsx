@@ -19,38 +19,44 @@ const DetectPresence: FC<IDetectPresence> = (props) => {
         props.setVisibleSelectSerial(true);
     }
 
-    const [qtdeDetectada, setQtdeDetectada] = useState<number>(0);
+    const [detectionCount, setDetectionCount] = useState<number>(0);
     const [detectionStatus, setDetectionStatus] = useState<'off' | 'on'>('off')
-    const [statusSistema, setStatusSistema] = useState<'desligado' | 'ligado'>('desligado')
+    const [isSystemEnabled, setSystemEnabled] = useState<boolean>(false)
 
-
+    const getSystemEnabledTemplate = () => {
+        return isSystemEnabled ? 'ligado' : 'desligado'
+    }
 
     useEffect(() => {
-        ipcService.initializeModuleListener(SERIAL_ROUTES.MODULE.init)
-            .subscribe(
-                {
-                    next: ({ body }) => {
-                        console.log(body);
-                        addSerialDataListener();
-                    },
-                    error: (error) => console.log(error)
-                }
-            );
-        ipcService.initializeModuleListener(FILE_ROUTES.MODULE.init)
-            .subscribe(
-                {
-                    next: ({ body }) => {
-                        console.log(body);
-                        loadDeviceHistory();
-                    },
-                    error: (error) => console.log(error)
-                }
-            );
+        if (ipcService.isAvailable()) {
+
+            ipcService.initializeModuleListener(SERIAL_ROUTES.MODULE.init)
+                .subscribe(
+                    {
+                        next: ({ body }) => {
+                            console.log(body);
+                            addSerialDataListener();
+                        },
+                        error: (error) => console.log(error)
+                    }
+                );
+            ipcService.initializeModuleListener(FILE_ROUTES.MODULE.init)
+                .subscribe(
+                    {
+                        next: ({ body }) => {
+                            console.log(body);
+                            loadDeviceHistory();
+                        },
+                        error: (error) => console.log(error)
+                    }
+                );
+        }
 
         return () => {
             console.log('unmount selectSerial');
             if (ipcService.isAvailable()) {
-                ipcService.removeMainListener(FILE_ROUTES.MODULE.destroy);
+                ipcService.removeAllFromPage(SERIAL_ROUTES.MODULE.init);
+                ipcService.removeMainListener(SERIAL_ROUTES.MODULE.destroy);
                 ipcService.removeMainListener(FILE_ROUTES.MODULE.destroy);
             }
         }
@@ -61,13 +67,19 @@ const DetectPresence: FC<IDetectPresence> = (props) => {
     }
 
     const addSerialDataListener = () => {
-        console.log('addSerialDataListener');
+        console.log('addSerialDataListener', props.selectedPort);
 
         // Adiciona o listener para receber o dado do electron
         ipcService.on(SERIAL_ROUTES.MODULE.init, 'presence_detected', (data) => {
             console.log('RECEBI DO SERIAL', data);
-            let qtd = qtdeDetectada + 1;
-            setQtdeDetectada(qtd);
+            let presenceStatus = data === '1' ? true : false;
+            if (presenceStatus) {
+                let qtd = detectionCount + 1;
+                setDetectionCount(qtd);
+                setDetectionStatus('on');
+            } else {
+                setDetectionStatus('off');
+            }
         });
 
         // Envia para o electron um sinal para preparar o listener da porta serial
@@ -95,7 +107,7 @@ const DetectPresence: FC<IDetectPresence> = (props) => {
                 </div>
 
                 <div>
-                    <strong>Status: <span className={statusSistema}>{statusSistema}</span></strong>
+                    <strong>Status: <span className={getSystemEnabledTemplate() ? 'ligado' : 'desligado'}>{getSystemEnabledTemplate()}</span></strong>
                     <hr></hr>
                 </div>
 
@@ -105,7 +117,7 @@ const DetectPresence: FC<IDetectPresence> = (props) => {
                 </div>
 
                 <div className="qtde-section">
-                    <label><span className="qtde">{qtdeDetectada}</span> presenças detectadas</label>
+                    <label><span className="qtde">{detectionCount}</span> presenças detectadas</label>
                 </div>
 
                 <div className="exportar-section">

@@ -3,6 +3,8 @@ import { SERIAL_ROUTES } from "../../@common/routes/serial-routes";
 import ipcService from "../../services/ipc.service";
 import './SelectSerial.css';
 
+// TODO: Adicionar select de baudRate
+// TODO: Ajustar o botão de teste para testar a comunicação com a porta serial
 interface ISelectSerial {
     isVisibleSelectSerial: boolean,
     setVisibleSelectSerial: Dispatch<SetStateAction<boolean>>
@@ -43,6 +45,17 @@ const SelectSerial: FC<ISelectSerial> = (props) => {
         }
     }, []);
 
+    const sendSerialData = () => {
+        ipcService.sendAndExpectResponse(SERIAL_ROUTES.POST_DATA, 'teste', 'COM3').subscribe(
+            {
+                next: (data) => {
+                    console.log('sendSerialData: ', data);
+                },
+                error: (error) => console.log('error', error)
+            }
+        )
+    }
+
     const getPorts = () => {
         setLoadingPorts(true);
         ipcService.sendAndExpectResponse(SERIAL_ROUTES.GET_PORTS).subscribe(
@@ -54,7 +67,7 @@ const SelectSerial: FC<ISelectSerial> = (props) => {
                 },
                 error: (err) => {
                     console.log(err);
-                    setLoadingPorts(true);
+                    setLoadingPorts(false);
                 }
             }
         )
@@ -97,7 +110,8 @@ const SelectSerial: FC<ISelectSerial> = (props) => {
     }
 
     const handleSelectChange = (event: ChangeEvent<HTMLSelectElement>) => {
-        props.selectedPort = comPorts.find((port: any) => event.target.value === port.path);
+        console.log('handleSelectChange: ', event.target.value, props.selectedPort);
+        props.setSelectedPort(comPorts.find((port: any) => event.target.value === port.path));
     }
 
     return (
@@ -124,6 +138,7 @@ const SelectSerial: FC<ISelectSerial> = (props) => {
                             <button className="btn" disabled={isBtnConectarLoading} onClick={closePort}>
                                 {isBtnConectarLoading ? 'Aguarde...' : 'Desconectar'}
                             </button>
+                            <button onClick={sendSerialData}>TESTE</button>
                         </div>
                     </div>
                     :

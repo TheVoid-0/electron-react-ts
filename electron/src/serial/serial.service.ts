@@ -38,7 +38,7 @@ export class SerialService {
                 break;
             case 'p': // detector de presença
                 // TODO: adicionar o pid no nome do arquivo
-                window.webContents.send('presence_detected', data)
+                window.webContents.send('presence_detected', data[1]);
                 // this.fileService.writeFile(`log_teste.txt`, Buffer.from(''));
                 break;
             default:
@@ -129,7 +129,7 @@ export class SerialService {
                     break;
             }
         })
-        console.log('Listener serial setado');
+        console.log('Listener serial setado: ', port.path);
 
     }
 
@@ -147,7 +147,7 @@ export class SerialService {
 
     // TODO: Verificar o cleanup da serial port
     public async open(path: string) {
-        usbNgElectronApp.onTerminate(this.cleanup);
+        usbNgElectronApp.onTerminate(this.cleanup.bind(this));
         return await this.serialProvider.open(path);
     }
 

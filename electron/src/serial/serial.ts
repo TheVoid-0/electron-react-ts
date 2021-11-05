@@ -42,6 +42,9 @@ export class Serial {
         this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_LED_STATUS, serialController.postLedStatus.bind(serialController));
 
         this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_SET_DATA_LISTENER, serialController.setupSerialListeners.bind(serialController, usbNgElectronApp.getMainWindow()));
+
+        this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_DATA, serialController.postData.bind(serialController));
+
         // Avisa que o módulo preparou as rotas para as funcionalidades
         initialEvent.sender.send(this.channel);
 
