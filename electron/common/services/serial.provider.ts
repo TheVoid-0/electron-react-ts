@@ -1,5 +1,5 @@
 import SerialPort = require('serialport');
-import { AsyncSubject, Observable, Subscription } from 'rxjs'
+import { AsyncSubject, Observable, ReplaySubject, Subscription } from 'rxjs'
 import { Service } from 'typedi';
 
 // type SerialPort = typeof import('serialport')
@@ -11,7 +11,7 @@ export class SerialProvider {
 
     private serialPort: typeof SerialPort
     private portsOpened: { [path: string]: { port: SerialPort, portInfo: SerialPort.PortInfo } } = {};
-    private portReadyASubject: AsyncSubject<SerialPort> = new AsyncSubject<SerialPort>();
+    private portReadyRSubject: ReplaySubject<SerialPort> = new ReplaySubject<SerialPort>();
     /**
      * Dados que estão pendentes para envio na porta serial
      */
@@ -56,7 +56,7 @@ export class SerialProvider {
                     // Passando tipo fixo no retorno do findPort pois nesse caso, como a porta já foi aberta, é impossível ele não encontrar a porta
                     this.portsOpened[path] = { port: port, portInfo: await this.findPort({ path: path }) as SerialPort.PortInfo };
 
-                    this.portReadyASubject.next(this.portsOpened[path].port);
+                    this.portReadyRSubject.next(this.portsOpened[path].port);
                     resolve(this.portsOpened[path].port);
                 }
             });
@@ -179,7 +179,6 @@ export class SerialProvider {
         return !!this.serialDataWaiting[dataKey];
     }
 
-    // TODO: verificar next do asyncSubject que não está funcionando
     /**
      * Retorna a porta do caminho especificado assim que ela estiver pronta. Ficará aguardando por tempo indeterminado a porta solicitada
      * 
@@ -195,16 +194,22 @@ export class SerialProvider {
             }
 
             console.log('Adicionando subscribe no portReadyASubject');
-            this.portReadyASubject.subscribe(
+            let subscription = this.portReadyRSubject.asObservable().subscribe(
                 {
                     next: (port) => {
                         console.log('onPortReady subscription, porta aberta: ', port.path)
-                        if (port.path === path) {
+                        if (port.path === path && port.isOpen) {
                             subscriber.next(port);
                             subscriber.complete();
+                            subscription.unsubscribe();
                         }
                     },
-                    error: (error) => { console.log('subscribe:', error); subscriber.error(error); subscriber.complete(); }
+                    error: (error) => {
+                        console.log('subscribe:', error); 
+                        subscriber.error(error); 
+                        subscriber.complete();
+                        subscription.unsubscribe();
+                    }
                 });
         });
     }
