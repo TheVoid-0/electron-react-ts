@@ -7,10 +7,21 @@ export class FileService {
     constructor() { }
 
     public writeFile(fileName: string, data: Buffer | string) {
-        fs.appendFile(__dirname + '/' + fileName, 'teste\n', (error) => {
-            if (error) throw error;
-            console.log('created');
-        })
+        return new Promise<void>((resolve, reject) => {
+            fs.appendFile(__dirname + '/' + fileName, Buffer.from(data.toString()), (error) => {
+                if (error) {
+                    reject(error);
+                }
+                console.log('created');
+                resolve();
+            });
+        });
+    }
+
+    public async saveDeviceHistory(devicePid: string, data: any) {
+        let err;
+        await this.writeFile(`log_${devicePid}.txt`, data).catch((error) => err = error);
+        return err;
     }
 
     public getDeviceHistory(devicePid: string) {
@@ -20,9 +31,10 @@ export class FileService {
                 if (err) {
                     console.log(err);
                     reject(err);
+                    return;
                 }
-                console.log(data);
-                resolve(data);
+                console.log(data, 'parsed: ', data.toString('utf-8'));
+                resolve(data.toString('utf-8'));
             });
         });
     }

@@ -19,6 +19,7 @@ const DetectPresence: FC<IDetectPresence> = (props) => {
         props.setVisibleSelectSerial(true);
     }
 
+    const [isIpcAvailable, setIsIpcAvailable] = useState(false);
     const [detectionCount, setDetectionCount] = useState<number>(0);
     const detectionCountRef = useRef(detectionCount);
     const [detectionStatus, setDetectionStatus] = useState<'off' | 'on'>('off')
@@ -29,6 +30,7 @@ const DetectPresence: FC<IDetectPresence> = (props) => {
     }
 
     useEffect(() => {
+        setIsIpcAvailable(ipcService.isAvailable());
         if (ipcService.isAvailable()) {
 
             ipcService.initializeModuleListener(SERIAL_ROUTES.MODULE.init)
@@ -54,17 +56,38 @@ const DetectPresence: FC<IDetectPresence> = (props) => {
         }
 
         return () => {
-            console.log('unmount selectSerial');
+            console.log('unmount detectPresence');
             if (ipcService.isAvailable()) {
+                console.log('removing listeners')
                 ipcService.removeAllFromPage(SERIAL_ROUTES.MODULE.init);
-                ipcService.removeMainListener(SERIAL_ROUTES.MODULE.destroy);
-                ipcService.removeMainListener(FILE_ROUTES.MODULE.destroy);
+                // ipcService.removeMainListener(SERIAL_ROUTES.MODULE.destroy);
+                // ipcService.removeMainListener(FILE_ROUTES.MODULE.destroy);
             }
         }
     }, [])
 
     const loadDeviceHistory = () => {
-        ipcService.sendAndExpectResponse(FILE_ROUTES.GET_DEVICE_HISTORY, props.selectedPort.productId)
+        ipcService.sendAndExpectResponse(FILE_ROUTES.GET_DEVICE_HISTORY, props.selectedPort.productId).
+            subscribe(
+                {
+                    next: ({ body }) => {
+                        console.log('historico do dispositivo: ', body);
+                    },
+                    error: (error) => console.log('error', error)
+                }
+            )
+    }
+
+    const exportFile = () => {
+        ipcService.sendAndExpectResponse(FILE_ROUTES.POST_DEVICE_HISTORY, props.selectedPort.productId, detectionCountRef.current).
+            subscribe(
+                {
+                    next: ({ body }) => {
+                        console.log(body);
+                    },
+                    error: (error) => console.log('error', error)
+                }
+            )
     }
 
     const addSerialDataListener = () => {
@@ -101,7 +124,7 @@ const DetectPresence: FC<IDetectPresence> = (props) => {
 
 
     return (
-        <div className={props.isVisibleDetectPresence ? 'show detection-content' : 'hide'}>
+        <div className={props.isVisibleDetectPresence && isIpcAvailable ? 'show detection-content' : 'hide'}>
             <div className="card">
 
                 <div className="link-voltar">
@@ -123,8 +146,7 @@ const DetectPresence: FC<IDetectPresence> = (props) => {
                 </div>
 
                 <div className="exportar-section">
-                    <button className="btn exportar">
-                        {/* todo: fazer exportar o arquivo txt */}
+                    <button className="btn exportar" onClick={exportFile}>
                         Exportar arquivo
                     </button>
                 </div>

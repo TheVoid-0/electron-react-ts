@@ -39,10 +39,10 @@ const SelectSerial: FC<ISelectSerial> = (props) => {
             )
         }
         return () => {
-            console.log('unmount selectSerial');
-            if (isIpcAvailable) {
-                ipcService.removeMainListener(SERIAL_ROUTES.MODULE.destroy)
-            }
+            // console.log('unmount selectSerial');
+            // if (isIpcAvailable) {
+            //     ipcService.removeMainListener(SERIAL_ROUTES.MODULE.destroy)
+            // }
         }
     }, []);
 
@@ -126,7 +126,7 @@ const SelectSerial: FC<ISelectSerial> = (props) => {
                             <small>Portas disponíveis:</small>
                             <select value={props.selectedPort.path} onChange={handleSelectChange}>
                                 <option value="0" selected>{comPorts.length > 0 ? 'Selecione uma porta...' : 'Nenhuma porta disponível!'}</option>
-                                {comPorts.map((port: any) => (<option value={port.path}>{`${port.path} ${port.productId}`}</option>))}
+                                {comPorts.map((port: any) => (<option value={port.path}>{`${port.path} ${port.productId ?? 'unknown PID'}`}</option>))}
                             </select>
 
                             <small>Baudrate:</small>

@@ -11,7 +11,16 @@ export class FileController {
     }
 
     public async getDeviceHistory(event: IpcMainEvent, devicePid: string) {
-        let data = await this.fileService.getDeviceHistory(devicePid);
+        let data;
+        data = await this.fileService.getDeviceHistory(devicePid)
+            .catch(err => {
+                data = { error: err, message: 'histórico do dispositivo possivelmente não existe' }
+            });
         event.sender.send(FILE_ROUTES.GET_DEVICE_HISTORY, data);
+    }
+
+    public async saveDeviceHistory(event: IpcMainEvent, devicePid: string, data: any) {
+        let err = await this.fileService.saveDeviceHistory(devicePid, data);
+        event.sender.send(FILE_ROUTES.POST_DEVICE_HISTORY, { error: err });
     }
 }

@@ -7,6 +7,7 @@ import { FileController } from "./file.controller";
 @Service()
 export class File {
     private channel = FILE_ROUTES.MODULE.init
+    private isInitialized = false;
 
     constructor(private _ipcMainService: IpcMainService, private fileController: FileController) {
         console.log('file constructor', this._ipcMainService)
@@ -16,11 +17,24 @@ export class File {
     }
 
     private async setupRoutes(initialEvent: IpcMainEvent) {
+        if (this.isInitialized) {
+            initialEvent.sender.send(this.channel)
+            return;
+        }
+        this.isInitialized = true;
+
         console.log('Criando rotas do modulo file');
+
+        this._ipcMainService.on(this.channel, FILE_ROUTES.MODULE.destroy, () => {
+            console.log('limpando rotas do modulo file')
+            this._ipcMainService.removeAllFromPage(this.channel);
+        });
 
         this._ipcMainService.on(this.channel,
             FILE_ROUTES.GET_DEVICE_HISTORY,
             this.fileController.getDeviceHistory.bind(this.fileController));
+
+        this._ipcMainService.on(this.channel, FILE_ROUTES.POST_DEVICE_HISTORY, this.fileController.saveDeviceHistory.bind(this.fileController));
 
         initialEvent.sender.send(FILE_ROUTES.MODULE.init);
 

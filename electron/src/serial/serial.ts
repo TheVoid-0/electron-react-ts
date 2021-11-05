@@ -6,9 +6,11 @@ import { IpcMainEvent } from "electron";
 import { SERIAL_ROUTES } from "../../../src/@common/routes/serial-routes";
 import { SerialController } from "./serial.controller";
 
+// TODO: Criar um tipo para o modulo como interface ou classe abstrata padronizando alguns parametros necessários
 @Service()
 export class Serial {
     private channel: string = SERIAL_ROUTES.MODULE.init;
+    private isInitialized: boolean = false;
     constructor(private _ipcMainService: IpcMainService) {
         console.log('serial constructor', this._ipcMainService)
 
@@ -17,10 +19,16 @@ export class Serial {
     }
 
     private async setupRoutes(initialEvent: IpcMainEvent) {
-        console.log('Criando rotas do modulo');
+        if (this.isInitialized) {
+            initialEvent.sender.send(this.channel)
+            return;
+        }
+        this.isInitialized = true;
+
+        console.log('Criando rotas do modulo serial');
 
         this._ipcMainService.on(this.channel, SERIAL_ROUTES.MODULE.destroy, () => {
-            console.log('limpando rotas do módulo')
+            console.log('limpando rotas do modulo serial')
             this._ipcMainService.removeAllFromPage(this.channel);
         });
 
