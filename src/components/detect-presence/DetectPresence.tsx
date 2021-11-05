@@ -1,4 +1,4 @@
-import React, { Dispatch, FC, SetStateAction, useEffect, useState } from 'react';
+import React, { Dispatch, FC, SetStateAction, useEffect, useRef, useState } from 'react';
 import './DetectPresence.css';
 import ipcService from '../../services/ipc.service';
 import { SERIAL_ROUTES } from '../../@common/routes/serial-routes';
@@ -20,8 +20,9 @@ const DetectPresence: FC<IDetectPresence> = (props) => {
     }
 
     const [detectionCount, setDetectionCount] = useState<number>(0);
+    const detectionCountRef = useRef(detectionCount);
     const [detectionStatus, setDetectionStatus] = useState<'off' | 'on'>('off')
-    const [isSystemEnabled, setSystemEnabled] = useState<boolean>(false)
+    const [isSystemEnabled, setSystemEnabled] = useState<boolean>(true)
 
     const getSystemEnabledTemplate = () => {
         return isSystemEnabled ? 'ligado' : 'desligado'
@@ -74,8 +75,9 @@ const DetectPresence: FC<IDetectPresence> = (props) => {
             console.log('RECEBI DO SERIAL', data);
             let presenceStatus = data === '1' ? true : false;
             if (presenceStatus) {
-                let qtd = detectionCount + 1;
+                let qtd = detectionCountRef.current + 1;
                 setDetectionCount(qtd);
+                detectionCountRef.current = qtd;
                 setDetectionStatus('on');
             } else {
                 setDetectionStatus('off');
