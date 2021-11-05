@@ -3,6 +3,7 @@ import { BrowserWindow, IpcMainEvent } from "electron";
 import { SERIAL_ROUTES } from "../../../src/@common/routes/serial-routes";
 import { SerialService } from "./serial.service";
 import { Service } from 'typedi';
+import SerialPort from 'serialport';
 
 
 // TODO: Criar um DTO para padronizar a entrada de dados em todos os endpoints e criar mensagens de erro ao receber parametros inexperados
@@ -36,10 +37,10 @@ export class SerialController {
         })
     }
 
-    public async openPort(event: IpcMainEvent, path: string) {
+    public async openPort(event: IpcMainEvent, path: string, options: SerialPort.OpenOptions) {
         console.log('args open-port', path);
 
-        let port = await this.serialService.open(path).catch((error) => {
+        let port = await this.serialService.open(path, options).catch((error) => {
             console.log(error);
             event.sender.send(SERIAL_ROUTES.POST_OPEN_PORT, { error: error, message: 'error' });
         });

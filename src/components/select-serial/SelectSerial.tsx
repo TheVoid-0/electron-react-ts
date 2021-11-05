@@ -18,6 +18,7 @@ const SelectSerial: FC<ISelectSerial> = (props) => {
     const [isLoadingPorts, setLoadingPorts] = useState(false);
 
     const [comPorts, setComPorts] = useState([]);
+    const [openComPortOptions, setOpenComPortOptions] = useState<any>({ baudRate: 19200 });
 
     // loadings
     const [isBtnConectarLoading, setBtnConectarLoading] = useState(false);
@@ -75,7 +76,7 @@ const SelectSerial: FC<ISelectSerial> = (props) => {
 
     const openPort = () => {
         setBtnConectarLoading(true);
-        ipcService.sendAndExpectResponse(SERIAL_ROUTES.POST_OPEN_PORT, props.selectedPort.path)
+        ipcService.sendAndExpectResponse(SERIAL_ROUTES.POST_OPEN_PORT, props.selectedPort.path, openComPortOptions)
             .subscribe({
                 next: () => {
                     console.log('Porta aberta!');
@@ -126,6 +127,13 @@ const SelectSerial: FC<ISelectSerial> = (props) => {
                             <select value={props.selectedPort.path} onChange={handleSelectChange}>
                                 <option value="0" selected>{comPorts.length > 0 ? 'Selecione uma porta...' : 'Nenhuma porta disponível!'}</option>
                                 {comPorts.map((port: any) => (<option value={port.path}>{`${port.path} ${port.productId}`}</option>))}
+                            </select>
+
+                            <small>Baudrate:</small>
+                            <select value={openComPortOptions.baudRate} onChange={(event) => setOpenComPortOptions({ baudRate: parseInt(event.target.value) })}>
+                                <option value={9600} >9600</option>
+                                <option value={19200} selected>19200</option>
+                                <option value={115200} >115200</option>
                             </select>
                         </div>
 

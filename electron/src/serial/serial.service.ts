@@ -146,9 +146,9 @@ export class SerialService {
     }
 
     // TODO: Verificar o cleanup da serial port
-    public async open(path: string) {
+    public async open(path: string, options?: SerialPort.OpenOptions) {
         usbNgElectronApp.onTerminate(this.cleanup.bind(this));
-        return await this.serialProvider.open(path);
+        return await this.serialProvider.open(path, options);
     }
 
     public async closePort(path?: string) {
