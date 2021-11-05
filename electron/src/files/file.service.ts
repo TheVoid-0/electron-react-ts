@@ -12,4 +12,18 @@ export class FileService {
             console.log('created');
         })
     }
+
+    public getDeviceHistory(devicePid: string) {
+        return new Promise((resolve, reject) => {
+            console.log('reading file history');
+            fs.readFile(`${__dirname}/log_${devicePid}.txt`, (err, data: Buffer) => {
+                if (err) {
+                    console.log(err);
+                    reject(err);
+                }
+                console.log(data);
+                resolve(data);
+            });
+        });
+    }
 }

@@ -32,7 +32,8 @@ function App() {
           <DetectPresence
             isVisibleDetectPresence={isVisibleDetectPresence}
             setVisibleSelectSerial={setVisibleSelectSerial}
-            setVisibleDetectPresence={setVisibleDetectPresence}>
+            setVisibleDetectPresence={setVisibleDetectPresence}
+            selectedPort={selectedPort}>
           </DetectPresence>
           : null
       }

@@ -1,4 +1,4 @@
-import React, { Dispatch, FC, SetStateAction, useEffect, useState } from "react";
+import React, { ChangeEvent, Dispatch, FC, SetStateAction, useEffect, useState } from "react";
 import { SERIAL_ROUTES } from "../../@common/routes/serial-routes";
 import ipcService from "../../services/ipc.service";
 import './SelectSerial.css';
@@ -7,8 +7,8 @@ interface ISelectSerial {
     isVisibleSelectSerial: boolean,
     setVisibleSelectSerial: Dispatch<SetStateAction<boolean>>
     setVisibleDetectPresence: Dispatch<SetStateAction<boolean>>
-    selectedPort: string
-    setSelectedPort: Dispatch<SetStateAction<string>>
+    selectedPort: any //{ path: string, productId: string }
+    setSelectedPort: Dispatch<SetStateAction<any>>
 }
 
 const SelectSerial: FC<ISelectSerial> = (props) => {
@@ -62,11 +62,12 @@ const SelectSerial: FC<ISelectSerial> = (props) => {
 
     const openPort = () => {
         setBtnConectarLoading(true);
-        ipcService.sendAndExpectResponse(SERIAL_ROUTES.POST_OPEN_PORT, props.selectedPort)
+        ipcService.sendAndExpectResponse(SERIAL_ROUTES.POST_OPEN_PORT, props.selectedPort.path)
             .subscribe({
                 next: () => {
                     console.log('Porta aberta!');
-                    addSerialDataListener()
+                    setBtnConectarLoading(false);
+                    showDetection();
                 },
                 error: (error) => {
                     setBtnConectarLoading(false)
@@ -75,29 +76,9 @@ const SelectSerial: FC<ISelectSerial> = (props) => {
             })
     }
 
-    const addSerialDataListener = () => {
-        ipcService.on(SERIAL_ROUTES.MODULE.init, 'presence_detected' , (data) => {
-            console.log('RECEBI DO SERIAL', data);
-        })
-        ipcService.sendAndExpectResponse(SERIAL_ROUTES.POST_SET_DATA_LISTENER, undefined, { path: props.selectedPort })
-            .subscribe(
-                {
-                    next: () => {
-                        console.log('Listeners adicionados!')
-                        setBtnConectarLoading(false);
-                        showDetection();
-                    },
-                    error: (error) => {
-                        console.log(error)
-                        setBtnConectarLoading(false)
-                    }
-                }
-            )
-    }
-
     const closePort = () => {
         setBtnConectarLoading(true);
-        ipcService.sendAndExpectResponse(SERIAL_ROUTES.POST_CLOSE_PORT, props.selectedPort)
+        ipcService.sendAndExpectResponse(SERIAL_ROUTES.POST_CLOSE_PORT, props.selectedPort.path)
             .subscribe({
                 next: () => {
                     console.log('Porta Fechada!');
@@ -115,6 +96,10 @@ const SelectSerial: FC<ISelectSerial> = (props) => {
         props.setVisibleDetectPresence(true);
     }
 
+    const handleSelectChange = (event: ChangeEvent<HTMLSelectElement>) => {
+        props.selectedPort = comPorts.find((port: any) => event.target.value === port.path);
+    }
+
     return (
         <div className={props.isVisibleSelectSerial ? 'show selection-content' : 'hide'}>
             <div className="card">
@@ -124,7 +109,7 @@ const SelectSerial: FC<ISelectSerial> = (props) => {
 
                         <div>
                             <small>Portas disponíveis:</small>
-                            <select value={props.selectedPort} onChange={(event) => { props.setSelectedPort(event.target.value) }}>
+                            <select value={props.selectedPort.path} onChange={handleSelectChange}>
                                 <option value="0" selected>{comPorts.length > 0 ? 'Selecione uma porta...' : 'Nenhuma porta disponível!'}</option>
                                 {comPorts.map((port: any) => (<option value={port.path}>{`${port.path} ${port.productId}`}</option>))}
                             </select>
