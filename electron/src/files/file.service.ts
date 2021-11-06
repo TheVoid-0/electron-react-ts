@@ -8,7 +8,6 @@ export class FileService {
     private defaultSaveLocation = join(__dirname, '..', '..', '..', '..', '..', 'public', 'saved');
     constructor() { }
 
-    // TODO: Salvar o arquivo em um local que não seja apagado em cada build
     public writeFile(filePath: string, data: Buffer | string) {
         return new Promise<void>((resolve, reject) => {
             fs.mkdir(dirname(filePath), { recursive: true }, (error) => {
@@ -50,7 +49,7 @@ export class FileService {
     public getDeviceHistory(devicePid: string) {
         return new Promise((resolve, reject) => {
             console.log('reading file history');
-            fs.readFile(`${__dirname}/log_${devicePid}.txt`, (err, data: Buffer) => {
+            fs.readFile(join(this.defaultSaveLocation, `log_${devicePid}.txt`), (err, data: Buffer) => {
                 if (err) {
                     console.log(err);
                     reject(err);
