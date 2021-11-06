@@ -72,6 +72,7 @@ const DetectPresence: FC<IDetectPresence> = (props) => {
                 {
                     next: ({ body }) => {
                         console.log('historico do dispositivo: ', body);
+                        setDetectionCount(parseInt(body));
                     },
                     error: (error) => console.log('error', error)
                 }

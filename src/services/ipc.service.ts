@@ -58,7 +58,7 @@ class IpcService {
             if (args?.error) {
                 subscriber.error(args.message)
             } else {
-                subscriber.next({ body: { ...args } });
+                subscriber.next({ body: args });
             }
             unsub();
             subscriber.complete();
