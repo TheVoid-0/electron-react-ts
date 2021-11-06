@@ -114,10 +114,11 @@ export class SerialService {
 
     }
 
+    // TODO: Adicionar funcionalidade para desativar o listener de serial
     private readData(window: BrowserWindow, port: SerialPort, responseChannel?: string) {
         // Garante que somente um listener de data será adicionado a esta porta
         port.removeAllListeners('data');
-        
+
         let parser = this.serialProvider.setReadLineParser(port);
         parser.on('data', (data: string) => {
             console.log('dados recebidos: ', data);

@@ -6,6 +6,8 @@ export class FileService {
 
     constructor() { }
 
+    // TODO: Trocar o append por um write para substituir o valor salvo e nao concatenar
+    // TODO: Salvar o arquivo em um local que não seja apagado em cada build
     public writeFile(fileName: string, data: Buffer | string) {
         return new Promise<void>((resolve, reject) => {
             fs.appendFile(__dirname + '/' + fileName, Buffer.from(data.toString()), (error) => {
