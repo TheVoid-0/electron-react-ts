@@ -6,14 +6,11 @@ import { Service } from 'typedi';
 import SerialPort from 'serialport';
 import { FileService } from '../files/file.service';
 
-// TODO: Criar as classes com as dependências no construtor e exportar elas instanciando as dependências necessárias
-// TODO: Deixar as funções do service como async
 @Service()
 export class SerialService {
 
     constructor(private serialProvider: SerialProvider, private fileService: FileService) {
         console.log('serialService constructor');
-        this.fileService.writeFile('teste.txt', 'teste');
     }
 
     private readInfo(data: string, window: BrowserWindow, port: SerialPort, responseChannel?: string) {
@@ -37,9 +34,7 @@ export class SerialService {
                 window.webContents.send('t', temp);
                 break;
             case 'p': // detector de presença
-                // TODO: adicionar o pid no nome do arquivo
                 window.webContents.send('presence_detected', data[1]);
-                // this.fileService.writeFile(`log_teste.txt`, Buffer.from(''));
                 break;
             default:
                 break;

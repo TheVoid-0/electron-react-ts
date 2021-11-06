@@ -1,28 +1,49 @@
 import * as fs from 'fs';
 import { Service } from 'typedi';
-
+import { dialog } from 'electron';
+import { usbNgElectronApp } from '../app';
+import { join, dirname } from 'path';
 @Service()
 export class FileService {
-
+    private defaultSaveLocation = join(__dirname, '..', '..', '..', '..', '..', 'public', 'saved');
     constructor() { }
 
-    // TODO: Trocar o append por um write para substituir o valor salvo e nao concatenar
     // TODO: Salvar o arquivo em um local que não seja apagado em cada build
-    public writeFile(fileName: string, data: Buffer | string) {
+    public writeFile(filePath: string, data: Buffer | string) {
         return new Promise<void>((resolve, reject) => {
-            fs.appendFile(__dirname + '/' + fileName, Buffer.from(data.toString()), (error) => {
+            fs.mkdir(dirname(filePath), { recursive: true }, (error) => {
+
                 if (error) {
+                    console.log('mkdir error: ', error);
                     reject(error);
+                    return;
                 }
-                console.log('created');
-                resolve();
+
+                fs.writeFile(filePath, Buffer.from(data.toString()), (error) => {
+                    if (error) {
+                        console.log('create file error: ', error);
+                        reject(error);
+                        return;
+                    }
+                    console.log('created file on: ', filePath);
+                    resolve();
+                });
             });
+
         });
     }
 
     public async saveDeviceHistory(devicePid: string, data: any) {
         let err;
-        await this.writeFile(`log_${devicePid}.txt`, data).catch((error) => err = error);
+        try {
+            let dialogReturn = await dialog.showSaveDialog(usbNgElectronApp.getMainWindow(), { filters: [{ extensions: ['txt'], name: 'log' }] });
+            if (dialogReturn.filePath) {
+                await this.writeFile(`${dialogReturn.filePath}`, data);
+            }
+            await this.writeFile(join(this.defaultSaveLocation, `log_${devicePid}.txt`), data);
+        } catch (error) {
+            err = error
+        }
         return err;
     }
 
