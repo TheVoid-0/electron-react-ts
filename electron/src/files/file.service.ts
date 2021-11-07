@@ -37,7 +37,7 @@ export class FileService {
         try {
             let dialogReturn = await dialog.showSaveDialog(usbNgElectronApp.getMainWindow(), { filters: [{ extensions: ['txt'], name: 'log' }] });
             if (dialogReturn.filePath) {
-                await this.writeFile(`${dialogReturn.filePath}`, data);
+                await this.writeFile(dialogReturn.filePath, `PID: ${devicePid} ${new Date().toLocaleDateString('pt-br')} -  presenças detectadas: ${data}`);
             }
             await this.writeFile(join(this.defaultSaveLocation, `log_${devicePid}.txt`), data);
         } catch (error) {
