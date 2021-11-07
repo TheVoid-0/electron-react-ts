@@ -1,6 +1,6 @@
 import { app, BrowserWindow } from 'electron';
 import * as path from 'path';
-import { usbNgElectronApp } from './src/app';
+import { electronApp } from './src/app';
 
 // verifica se foi passado o argumento para dar auto-reload
 const args: string[] = process.argv.slice(1);
@@ -18,7 +18,7 @@ function createWindow() {
             preload: path.join(__dirname, "api/ipc-renderer/ipc-renderer-preload.js")
         }
     })
-    usbNgElectronApp.addWindow(mainWindow);
+    electronApp.addWindow(mainWindow);
 
     if (watch) {
 

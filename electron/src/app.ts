@@ -1,14 +1,12 @@
 
 import 'reflect-metadata'
 import { Container } from 'typedi';
-import { BrowserWindow, IpcMainEvent } from 'electron';
+import { BrowserWindow } from 'electron';
 import { Serial } from './serial/serial';
 import { File } from './files/file';
+import { Module } from './app.types';
 
-export abstract class Module {
-    protected abstract isInitialized: boolean;
-    protected abstract setupRoutes(event: IpcMainEvent): void
-}
+
 /**
  * cada AppModule se refere a um modulo lógico do sistema, uma "parte" que contém funcionalidades atrelada a lógica de negócio.
  * Os modulos contidos aqui serão inicializados ao criar a aplicação
@@ -78,4 +76,4 @@ export class App {
 
 }
 
-export const usbNgElectronApp = new App();
+export const electronApp = new App();

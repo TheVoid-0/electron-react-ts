@@ -3,7 +3,6 @@ import { SERIAL_ROUTES } from "../../@common/routes/serial-routes";
 import ipcService from "../../services/ipc.service";
 import './SelectSerial.css';
 
-// TODO: Adicionar select de baudRate
 // TODO: Ajustar o botão de teste para testar a comunicação com a porta serial
 interface ISelectSerial {
     isVisibleSelectSerial: boolean,

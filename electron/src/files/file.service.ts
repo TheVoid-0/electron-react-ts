@@ -1,12 +1,12 @@
 import * as fs from 'fs';
 import { Service } from 'typedi';
 import { dialog } from 'electron';
-import { usbNgElectronApp } from '../app';
 import { join, dirname } from 'path';
+import { AppService } from '../../common/services/app.service';
 @Service()
 export class FileService {
     private defaultSaveLocation = join(__dirname, '..', '..', '..', '..', '..', 'public', 'saved');
-    constructor() { }
+    constructor(private appService: AppService) { }
 
     public writeFile(filePath: string, data: Buffer | string) {
         return new Promise<void>((resolve, reject) => {
@@ -35,7 +35,7 @@ export class FileService {
     public async saveDeviceHistory(devicePid: string, data: any) {
         let err;
         try {
-            let dialogReturn = await dialog.showSaveDialog(usbNgElectronApp.getMainWindow(), { filters: [{ extensions: ['txt'], name: 'log' }] });
+            let dialogReturn = await dialog.showSaveDialog(this.appService.getMainWindow(), { filters: [{ extensions: ['txt'], name: 'log' }] });
             if (dialogReturn.filePath) {
                 await this.writeFile(dialogReturn.filePath, `PID: ${devicePid} ${new Date().toLocaleDateString('pt-br')} -  presenças detectadas: ${data}`);
             }

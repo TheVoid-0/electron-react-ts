@@ -1,15 +1,15 @@
 import { BrowserWindow } from 'electron';
 import { Observable } from 'rxjs'
-import { usbNgElectronApp } from '../app';
 import { SerialProvider } from '../../common/services/serial.provider'
 import { Service } from 'typedi';
 import SerialPort from 'serialport';
 import { FileService } from '../files/file.service';
+import { AppService } from '../../common/services/app.service';
 
 @Service()
 export class SerialService {
 
-    constructor(private serialProvider: SerialProvider, private fileService: FileService) {
+    constructor(private serialProvider: SerialProvider, private fileService: FileService, private appService: AppService) {
         console.log('serialService constructor');
     }
 
@@ -154,7 +154,7 @@ export class SerialService {
 
     // TODO: Verificar o cleanup da serial port
     public async open(path: string, options?: SerialPort.OpenOptions) {
-        usbNgElectronApp.onTerminate(this.cleanup.bind(this));
+        this.appService.onTerminate(this.cleanup.bind(this));
         return await this.serialProvider.open(path, options);
     }
 
@@ -163,6 +163,7 @@ export class SerialService {
     }
 
     private cleanup() {
+        console.log('rodando cleanup serial')
         this.serialProvider.closePort();
     }
 }

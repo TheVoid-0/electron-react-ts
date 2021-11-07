@@ -3,7 +3,7 @@ import { Service } from "typedi";
 import { IpcMainService } from "../../common/services/ipc-main.service";
 import { FILE_ROUTES } from "../../../src/@common/routes/file-routes"
 import { FileController } from "./file.controller";
-import { Module } from "../app";
+import { Module } from "../app.types";
 
 @Service()
 export class File extends Module {

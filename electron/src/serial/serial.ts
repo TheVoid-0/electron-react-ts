@@ -1,17 +1,17 @@
-import { Module, usbNgElectronApp } from "../app";
-import { SerialService } from "./serial.service";
 import Container, { Service } from 'typedi';
 import { IpcMainService } from "../../common/services/ipc-main.service";
 import { IpcMainEvent } from "electron";
 import { SERIAL_ROUTES } from "../../../src/@common/routes/serial-routes";
 import { SerialController } from "./serial.controller";
+import { Module } from "../app.types";
+import { AppService } from '../../common/services/app.service';
 
 @Service()
 export class Serial extends Module {
     private channel: string = SERIAL_ROUTES.MODULE.init;
     protected isInitialized: boolean = false;
 
-    constructor(private _ipcMainService: IpcMainService) {
+    constructor(private _ipcMainService: IpcMainService, private _appService: AppService) {
         super()
         console.log('serial constructor', this._ipcMainService)
 
@@ -50,7 +50,7 @@ export class Serial extends Module {
 
         this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_LED_STATUS, serialController.postLedStatus.bind(serialController));
 
-        this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_SET_DATA_LISTENER, serialController.setupSerialListeners.bind(serialController, usbNgElectronApp.getMainWindow()));
+        this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_SET_DATA_LISTENER, serialController.setupSerialListeners.bind(serialController, this._appService.getMainWindow()));
 
         this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_REMOVE_DATA_LISTENER, serialController.removeSerialListeners.bind(serialController));
 
