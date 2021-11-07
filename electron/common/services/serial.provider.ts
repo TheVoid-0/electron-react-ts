@@ -70,7 +70,6 @@ export class SerialProvider {
     }
 
     // TODO: Testar o cancelamento das inscrições e a disponibilidade da subscription após o subscriber.complete()
-    // TODO: Verificar se os parametros data e dataKey não ficarão indisponíveis ao rodar o cb do subscribe após eles serem sobrescritos
     /**
      * OBS: O Observable não será completado até que uma porta serial seja aberta, ou seja, ao enviar um dado
      * por esta função, esse dado ficará esperando uma porta ser aberta para então completar o Observable.
@@ -147,6 +146,8 @@ export class SerialProvider {
                     });
                 }
             }
+
+            console.log('Portas fechadas');
             resolve();
         })
     }

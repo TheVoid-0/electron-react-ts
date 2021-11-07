@@ -1,4 +1,4 @@
-import { usbNgElectronApp } from "../app";
+import { Module, usbNgElectronApp } from "../app";
 import { SerialService } from "./serial.service";
 import Container, { Service } from 'typedi';
 import { IpcMainService } from "../../common/services/ipc-main.service";
@@ -6,19 +6,20 @@ import { IpcMainEvent } from "electron";
 import { SERIAL_ROUTES } from "../../../src/@common/routes/serial-routes";
 import { SerialController } from "./serial.controller";
 
-// TODO: Criar um tipo para o modulo como interface ou classe abstrata padronizando alguns parametros necessários
 @Service()
-export class Serial {
+export class Serial extends Module {
     private channel: string = SERIAL_ROUTES.MODULE.init;
-    private isInitialized: boolean = false;
+    protected isInitialized: boolean = false;
+
     constructor(private _ipcMainService: IpcMainService) {
+        super()
         console.log('serial constructor', this._ipcMainService)
 
         // Cria a rota principal desse módulo que irá inicializar as outras rotas quando solicitada
         this._ipcMainService.initializeModuleListener(this.channel, this.setupRoutes.bind(this));
     }
 
-    private async setupRoutes(initialEvent: IpcMainEvent) {
+    protected async setupRoutes(initialEvent: IpcMainEvent) {
         if (this.isInitialized) {
             initialEvent.sender.send(this.channel)
             return;

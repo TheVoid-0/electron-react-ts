@@ -3,20 +3,22 @@ import { Service } from "typedi";
 import { IpcMainService } from "../../common/services/ipc-main.service";
 import { FILE_ROUTES } from "../../../src/@common/routes/file-routes"
 import { FileController } from "./file.controller";
+import { Module } from "../app";
 
 @Service()
-export class File {
+export class File extends Module {
     private channel = FILE_ROUTES.MODULE.init
-    private isInitialized = false;
+    protected isInitialized = false;
 
     constructor(private _ipcMainService: IpcMainService, private fileController: FileController) {
+        super()
         console.log('file constructor', this._ipcMainService)
 
         // Cria a rota principal desse módulo que irá inicializar as outras rotas quando solicitada
         this._ipcMainService.initializeModuleListener(this.channel, this.setupRoutes.bind(this));
     }
 
-    private async setupRoutes(initialEvent: IpcMainEvent) {
+    protected async setupRoutes(initialEvent: IpcMainEvent) {
         if (this.isInitialized) {
             initialEvent.sender.send(this.channel)
             return;

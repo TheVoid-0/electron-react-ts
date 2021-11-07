@@ -66,7 +66,6 @@ export class SerialService {
         }
     }
 
-    // TODO: Alterar protocolo de comunicação se necessário e adicionar lógica para contar o número de presenças
     public async setupListeners(window: BrowserWindow, responseChannel: string, port: { pid?: string, path?: string }): Promise<any> {
 
         if (!port.path && !port.pid) {

@@ -1,18 +1,21 @@
 
 import 'reflect-metadata'
 import { Container } from 'typedi';
-import { BrowserWindow } from 'electron';
+import { BrowserWindow, IpcMainEvent } from 'electron';
 import { Serial } from './serial/serial';
 import { File } from './files/file';
 
-type Modules = { new(...args: any[]): any };
+export abstract class Module {
+    protected abstract isInitialized: boolean;
+    protected abstract setupRoutes(event: IpcMainEvent): void
+}
 /**
  * cada AppModule se refere a um modulo lógico do sistema, uma "parte" que contém funcionalidades atrelada a lógica de negócio.
  * Os modulos contidos aqui serão inicializados ao criar a aplicação
  */
-const AppModules: Array<Modules> = [
+const AppModules: Array<new (...args: any[]) => Module> = [
     Serial,
-    File
+    File,
 ]
 // TODO: verificar para adicionar a possibilidade de cada modulo poder rodar em uma "thread"
 export class App {
