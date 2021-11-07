@@ -18,6 +18,11 @@ export class SerialController {
         event.sender.send(SERIAL_ROUTES.POST_SET_DATA_LISTENER, err);
     }
 
+    public removeSerialListeners(event: IpcMainEvent, findPortOptions: { path?: string, pid?: string }) {
+        let err = this.serialService.removeAllListeners(findPortOptions, 'data');
+        event.sender.send(SERIAL_ROUTES.POST_REMOVE_DATA_LISTENER, err);
+    }
+
     public async postData(event: IpcMainEvent, data: any, portPath: string) {
         await firstValueFrom(this.serialService.sendCommand(data, portPath));
         event.sender.send(SERIAL_ROUTES.POST_DATA);

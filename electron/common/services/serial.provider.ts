@@ -38,6 +38,19 @@ export class SerialProvider {
         return await this.serialPort.list();
     }
 
+    public getOpenedPort(findOptions: { path?: string, pid?: string }) {
+        if (findOptions.path) {
+            return this.portsOpened[findOptions.path].port
+        }
+        for (const key in this.portsOpened) {
+            if (this.portsOpened[key].portInfo.productId === findOptions.pid) {
+                return this.portsOpened[key].port
+            }
+        }
+
+        return undefined;
+    }
+
     public async open(path: string, options?: SerialPort.OpenOptions): Promise<SerialPort> {
         // Se a porta requisita já esta aberta retorna ela
         if (this.portsOpened[path] && this.portsOpened[path].port.path === path) {
@@ -206,8 +219,8 @@ export class SerialProvider {
                         }
                     },
                     error: (error) => {
-                        console.log('subscribe:', error); 
-                        subscriber.error(error); 
+                        console.log('subscribe:', error);
+                        subscriber.error(error);
                         subscriber.complete();
                         subscription.unsubscribe();
                     }

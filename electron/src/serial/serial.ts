@@ -52,6 +52,8 @@ export class Serial extends Module {
 
         this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_SET_DATA_LISTENER, serialController.setupSerialListeners.bind(serialController, usbNgElectronApp.getMainWindow()));
 
+        this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_REMOVE_DATA_LISTENER, serialController.removeSerialListeners.bind(serialController));
+
         this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_DATA, serialController.postData.bind(serialController));
 
         // Avisa que o módulo preparou as rotas para as funcionalidades
