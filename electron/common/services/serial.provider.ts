@@ -77,7 +77,7 @@ export class SerialProvider {
     }
 
     public setReadLineParser(port: SerialPort): SerialPort.parsers.Readline {
-        const parser = new SerialPort.parsers.Readline({ encoding: 'utf8', delimiter: '\n' });
+        const parser = new SerialPort.parsers.Readline({ encoding: 'ascii', delimiter: Buffer.from([0x10]) });
         port.pipe(parser)
         return parser;
     }

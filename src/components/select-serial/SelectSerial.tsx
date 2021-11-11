@@ -145,7 +145,6 @@ const SelectSerial: FC<ISelectSerial> = (props) => {
                             <button className="btn" disabled={isBtnConectarLoading} onClick={closePort}>
                                 {isBtnConectarLoading ? 'Aguarde...' : 'Desconectar'}
                             </button>
-                            <button onClick={sendSerialData}>TESTE</button>
                         </div>
                     </div>
                     :
