@@ -1,19 +1,16 @@
 import { BrowserWindow } from 'electron';
 import { Observable } from 'rxjs'
-import { usbNgElectronApp } from '../app';
 import { SerialProvider } from '../../common/services/serial.provider'
 import { Service } from 'typedi';
 import SerialPort from 'serialport';
 import { FileService } from '../files/file.service';
+import { AppService } from '../../common/services/app.service';
 
-// TODO: Criar as classes com as dependências no construtor e exportar elas instanciando as dependências necessárias
-// TODO: Deixar as funções do service como async
 @Service()
 export class SerialService {
 
-    constructor(private serialProvider: SerialProvider, private fileService: FileService) {
+    constructor(private serialProvider: SerialProvider, private fileService: FileService, private appService: AppService) {
         console.log('serialService constructor');
-        this.fileService.writeFile('teste.txt', 'teste');
     }
 
     private readInfo(data: string, window: BrowserWindow, port: SerialPort, responseChannel?: string) {
@@ -37,9 +34,7 @@ export class SerialService {
                 window.webContents.send('t', temp);
                 break;
             case 'p': // detector de presença
-                // TODO: adicionar o pid no nome do arquivo
-                window.webContents.send('presence_detected', data)
-                this.fileService.writeFile(`log_teste.txt`, Buffer.from(''));
+                window.webContents.send('presence_detected', data[1]);
                 break;
             default:
                 break;
@@ -71,7 +66,16 @@ export class SerialService {
         }
     }
 
-    // TODO: Alterar protocolo de comunicação se necessário e adicionar lógica para contar o número de presenças
+    public removeAllListeners(port: { pid?: string, path?: string }, eventName: string) {
+        let portOpened = this.serialProvider.getOpenedPort(port);
+        if (!portOpened) {
+            return { error: true, message: `Não foi possível encontrar a porta: ${port.pid} ${port.path}` }
+        }
+
+        portOpened.removeAllListeners(eventName);
+        return;
+    }
+
     public async setupListeners(window: BrowserWindow, responseChannel: string, port: { pid?: string, path?: string }): Promise<any> {
 
         if (!port.path && !port.pid) {
@@ -115,6 +119,9 @@ export class SerialService {
     }
 
     private readData(window: BrowserWindow, port: SerialPort, responseChannel?: string) {
+        // Garante que somente um listener de data será adicionado a esta porta
+        port.removeAllListeners('data');
+
         let parser = this.serialProvider.setReadLineParser(port);
         parser.on('data', (data: string) => {
             console.log('dados recebidos: ', data);
@@ -129,7 +136,7 @@ export class SerialService {
                     break;
             }
         })
-        console.log('Listener serial setado');
+        console.log('Listener serial setado: ', port.path);
 
     }
 
@@ -137,18 +144,18 @@ export class SerialService {
         return await this.serialProvider.findPorts();
     }
 
-    public sendData(data: string) {
-        return this.serialProvider.sendData(data);
+    public sendData(portPath: string, data: string) {
+        return this.serialProvider.sendData(portPath, data);
     }
 
-    public sendCommand(data: string): Observable<void> {
-        return this.serialProvider.sendData(`c${data}\n`);
+    public sendCommand(data: string, portPath: string): Observable<void> {
+        return this.serialProvider.sendData(`c${data}\n`, portPath);
     }
 
     // TODO: Verificar o cleanup da serial port
-    public async open(path: string) {
-        usbNgElectronApp.onTerminate(this.cleanup);
-        return await this.serialProvider.open(path);
+    public async open(path: string, options?: SerialPort.OpenOptions) {
+        this.appService.onTerminate(this.cleanup.bind(this));
+        return await this.serialProvider.open(path, options);
     }
 
     public async closePort(path?: string) {
@@ -156,6 +163,7 @@ export class SerialService {
     }
 
     private cleanup() {
+        console.log('rodando cleanup serial')
         this.serialProvider.closePort();
     }
 }

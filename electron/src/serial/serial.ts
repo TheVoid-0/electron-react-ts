@@ -1,27 +1,35 @@
-import { usbNgElectronApp } from "../app";
-import { SerialService } from "./serial.service";
 import Container, { Service } from 'typedi';
 import { IpcMainService } from "../../common/services/ipc-main.service";
 import { IpcMainEvent } from "electron";
 import { SERIAL_ROUTES } from "../../../src/@common/routes/serial-routes";
 import { SerialController } from "./serial.controller";
+import { Module } from "../app.types";
+import { AppService } from '../../common/services/app.service';
 
-// TODO: Criar um DTO para padronizar a entrada de dados em todos os endpoints e criar mensagens de erro ao receber parametros inexperados
 @Service()
-export class Serial {
+export class Serial extends Module {
     private channel: string = SERIAL_ROUTES.MODULE.init;
-    constructor(private _ipcMainService: IpcMainService) {
+    protected isInitialized: boolean = false;
+
+    constructor(private _ipcMainService: IpcMainService, private _appService: AppService) {
+        super()
         console.log('serial constructor', this._ipcMainService)
 
         // Cria a rota principal desse módulo que irá inicializar as outras rotas quando solicitada
         this._ipcMainService.initializeModuleListener(this.channel, this.setupRoutes.bind(this));
     }
 
-    private async setupRoutes(initialEvent: IpcMainEvent) {
-        console.log('Criando rotas do modulo');
+    protected async setupRoutes(initialEvent: IpcMainEvent) {
+        if (this.isInitialized) {
+            initialEvent.sender.send(this.channel)
+            return;
+        }
+        this.isInitialized = true;
+
+        console.log('Criando rotas do modulo serial');
 
         this._ipcMainService.on(this.channel, SERIAL_ROUTES.MODULE.destroy, () => {
-            console.log('limpando rotas do módulo')
+            console.log('limpando rotas do modulo serial')
             this._ipcMainService.removeAllFromPage(this.channel);
         });
 
@@ -42,7 +50,12 @@ export class Serial {
 
         this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_LED_STATUS, serialController.postLedStatus.bind(serialController));
 
-        this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_SET_DATA_LISTENER, serialController.setupSerialListeners.bind(serialController, usbNgElectronApp.getMainWindow()));
+        this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_SET_DATA_LISTENER, serialController.setupSerialListeners.bind(serialController, this._appService.getMainWindow()));
+
+        this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_REMOVE_DATA_LISTENER, serialController.removeSerialListeners.bind(serialController));
+
+        this._ipcMainService.on(this.channel, SERIAL_ROUTES.POST_DATA, serialController.postData.bind(serialController));
+
         // Avisa que o módulo preparou as rotas para as funcionalidades
         initialEvent.sender.send(this.channel);
 

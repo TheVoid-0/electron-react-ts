@@ -1,20 +1,23 @@
-import React, { Dispatch, FC, SetStateAction, useEffect, useState } from "react";
+import React, { ChangeEvent, Dispatch, FC, SetStateAction, useEffect, useState } from "react";
 import { SERIAL_ROUTES } from "../../@common/routes/serial-routes";
 import ipcService from "../../services/ipc.service";
 import './SelectSerial.css';
 
+// TODO: Ajustar o botão de teste para testar a comunicação com a porta serial
 interface ISelectSerial {
     isVisibleSelectSerial: boolean,
     setVisibleSelectSerial: Dispatch<SetStateAction<boolean>>
     setVisibleDetectPresence: Dispatch<SetStateAction<boolean>>
-    selectedPort: string
-    setSelectedPort: Dispatch<SetStateAction<string>>
+    selectedPort: any //{ path: string, productId: string }
+    setSelectedPort: Dispatch<SetStateAction<any>>
 }
 
 const SelectSerial: FC<ISelectSerial> = (props) => {
     const [isIpcAvailable, setIpcAvailable] = useState(false);
+    const [isLoadingPorts, setLoadingPorts] = useState(false);
 
     const [comPorts, setComPorts] = useState([]);
+    const [openComPortOptions, setOpenComPortOptions] = useState<any>({ baudRate: 19200 });
 
     // loadings
     const [isBtnConectarLoading, setBtnConectarLoading] = useState(false);
@@ -35,32 +38,49 @@ const SelectSerial: FC<ISelectSerial> = (props) => {
             )
         }
         return () => {
-            console.log('unmount selectSerial');
-            if (isIpcAvailable) {
-                ipcService.removeMainListener(SERIAL_ROUTES.MODULE.destroy)
-            }
+            // console.log('unmount selectSerial');
+            // if (isIpcAvailable) {
+            //     ipcService.removeMainListener(SERIAL_ROUTES.MODULE.destroy)
+            // }
         }
     }, []);
 
+    const sendSerialData = () => {
+        ipcService.sendAndExpectResponse(SERIAL_ROUTES.POST_DATA, 'teste', 'COM3').subscribe(
+            {
+                next: (data) => {
+                    console.log('sendSerialData: ', data);
+                },
+                error: (error) => console.log('error', error)
+            }
+        )
+    }
+
     const getPorts = () => {
+        setLoadingPorts(true);
         ipcService.sendAndExpectResponse(SERIAL_ROUTES.GET_PORTS).subscribe(
             {
                 next: ({ body }) => {
                     console.log('ports: ', body);
                     setComPorts(body.ports);
+                    setLoadingPorts(false);
                 },
-                error: (err) => console.log(err)
+                error: (err) => {
+                    console.log(err);
+                    setLoadingPorts(false);
+                }
             }
         )
     }
 
     const openPort = () => {
         setBtnConectarLoading(true);
-        ipcService.sendAndExpectResponse(SERIAL_ROUTES.POST_OPEN_PORT, props.selectedPort)
+        ipcService.sendAndExpectResponse(SERIAL_ROUTES.POST_OPEN_PORT, props.selectedPort.path, openComPortOptions)
             .subscribe({
                 next: () => {
                     console.log('Porta aberta!');
-                    addSerialDataListener()
+                    setBtnConectarLoading(false);
+                    showDetection();
                 },
                 error: (error) => {
                     setBtnConectarLoading(false)
@@ -69,26 +89,9 @@ const SelectSerial: FC<ISelectSerial> = (props) => {
             })
     }
 
-    const addSerialDataListener = () => {
-        ipcService.sendAndExpectResponse(SERIAL_ROUTES.POST_SET_DATA_LISTENER, props.selectedPort)
-            .subscribe(
-                {
-                    next: () => {
-                        console.log('Listeners adicionados!')
-                        setBtnConectarLoading(false);
-                        showDetection();
-                    },
-                    error: (error) => {
-                        console.log(error)
-                        setBtnConectarLoading(false)
-                    }
-                }
-            )
-    }
-
     const closePort = () => {
         setBtnConectarLoading(true);
-        ipcService.sendAndExpectResponse(SERIAL_ROUTES.POST_CLOSE_PORT, props.selectedPort)
+        ipcService.sendAndExpectResponse(SERIAL_ROUTES.POST_CLOSE_PORT, props.selectedPort.path)
             .subscribe({
                 next: () => {
                     console.log('Porta Fechada!');
@@ -106,6 +109,11 @@ const SelectSerial: FC<ISelectSerial> = (props) => {
         props.setVisibleDetectPresence(true);
     }
 
+    const handleSelectChange = (event: ChangeEvent<HTMLSelectElement>) => {
+        console.log('handleSelectChange: ', event.target.value, props.selectedPort);
+        props.setSelectedPort(comPorts.find((port: any) => event.target.value === port.path));
+    }
+
     return (
         <div className={props.isVisibleSelectSerial ? 'show selection-content' : 'hide'}>
             <div className="card">
@@ -115,14 +123,23 @@ const SelectSerial: FC<ISelectSerial> = (props) => {
 
                         <div>
                             <small>Portas disponíveis:</small>
-                            <select value={props.selectedPort} onChange={(event) => { props.setSelectedPort(event.target.value) }}>
+                            <select value={props.selectedPort.path} onChange={handleSelectChange}>
                                 <option value="0" selected>{comPorts.length > 0 ? 'Selecione uma porta...' : 'Nenhuma porta disponível!'}</option>
-                                {comPorts.map((port: any) => (<option>{port.path}</option>))}
+                                {comPorts.map((port: any) => (<option value={port.path}>{`${port.path} ${port.productId ?? 'unknown PID'}`}</option>))}
+                            </select>
+
+                            <small>Baudrate:</small>
+                            <select value={openComPortOptions.baudRate} onChange={(event) => setOpenComPortOptions({ baudRate: parseInt(event.target.value) })}>
+                                <option value={9600} >9600</option>
+                                <option value={19200} selected>19200</option>
+                                <option value={115200} >115200</option>
                             </select>
                         </div>
 
+                        <p className="reload-ports" onClick={getPorts}>{isLoadingPorts ? 'Carregando portas...' : 'Recarregar portas'}</p>
+
                         <div className="conectar-section">
-                            <button className="btn" disabled={isBtnConectarLoading} onClick={openPort}>
+                            <button className="btn conectar" disabled={isBtnConectarLoading} onClick={openPort}>
                                 {isBtnConectarLoading ? 'Aguarde...' : 'Conectar'}
                             </button>
                             <button className="btn" disabled={isBtnConectarLoading} onClick={closePort}>

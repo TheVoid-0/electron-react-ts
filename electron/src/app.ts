@@ -3,14 +3,17 @@ import 'reflect-metadata'
 import { Container } from 'typedi';
 import { BrowserWindow } from 'electron';
 import { Serial } from './serial/serial';
+import { File } from './files/file';
+import { Module } from './app.types';
 
 
 /**
  * cada AppModule se refere a um modulo lógico do sistema, uma "parte" que contém funcionalidades atrelada a lógica de negócio.
  * Os modulos contidos aqui serão inicializados ao criar a aplicação
  */
-const AppModules = [
+const AppModules: Array<new (...args: any[]) => Module> = [
     Serial,
+    File,
 ]
 // TODO: verificar para adicionar a possibilidade de cada modulo poder rodar em uma "thread"
 export class App {
@@ -73,4 +76,4 @@ export class App {
 
 }
 
-export const usbNgElectronApp = new App();
+export const electronApp = new App();

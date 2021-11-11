@@ -22,3 +22,20 @@ select {
     padding: 7px 15px;
     width: 100%;
 }
+
+.btn.conectar {
+    margin-right: 10px;
+}
+
+.reload-ports {
+    color: rgb(169, 169, 169);
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all .4s;
+    text-align: end;
+}
+
+.reload-ports:hover {
+    color: #333834;
+}
